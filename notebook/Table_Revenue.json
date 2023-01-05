@@ -1,0 +1,1334 @@
+{
+	"name": "Table_Revenue",
+	"properties": {
+		"folder": {
+			"name": "Bikaner"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool5",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "224g",
+			"driverCores": 32,
+			"executorMemory": "224g",
+			"executorCores": 32,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "d8e06b32-c24e-4056-9a56-76a1cfb25cb2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool5",
+				"name": "Sparkpool5",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool5",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 32,
+				"memory": 224,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\r\n",
+					"import numpy as np\r\n",
+					"import datetime\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"import os\r\n",
+					"from pathlib import Path\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')"
+				],
+				"execution_count": 54
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ((datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 57
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"path='abfss://acmerealtime@ayanadatalake.dfs.core.windows.net/ACME_realtime/*'\r\n",
+					"path2='abfss://ayanaananthpuramrealtime@ayanadatalake.dfs.core.windows.net/ananthapuram_realtime_tags/'\r\n",
+					"pattoreadcsv_a = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_d/\"\r\n",
+					"pattoreadcsv_b = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_opcda/\"\r\n",
+					"path3='abfss://chikodi@ayanadatalake.dfs.core.windows.net/chikodi_cmx/'\r\n",
+					"path4='abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/'\r\n",
+					"path5_a='abfss://ayanapavagadadatalake@ayanadatalake.dfs.core.windows.net/PavagadaOpcData/Pavagada_RealTimeTags/'\r\n",
+					"path5_b='abfss://ayanapavagadadatalake@ayanadatalake.dfs.core.windows.net/PavagadaOpcData/Pavagada_RealTime_OpcUa/'\r\n",
+					"path6='abfss://trnl@ayanadatalake.dfs.core.windows.net/TRNL_Realtime/'\r\n",
+					"path7='abfss://nargund@ayanadatalake.dfs.core.windows.net/nargund_cmx/'"
+				],
+				"execution_count": 58
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"p=[path,path2,pattoreadcsv_a,pattoreadcsv_b,path3,path4,path5_a,path5_b,path6,path7]"
+				],
+				"execution_count": 59
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def path(p):\r\n",
+					"    pl=[]\r\n",
+					"    for i in p:\r\n",
+					"        location = i \r\n",
+					"        location= location+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"        pl.append(location)\r\n",
+					"    return pl  \r\n",
+					"locations=path(p)\r\n",
+					"locations"
+				],
+				"execution_count": 60
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def path(p):\r\n",
+					"    pl=[]\r\n",
+					"    for i in p:\r\n",
+					"        location = i \r\n",
+					"        #location= location+ date.split(\"-\")[0]+\"/\"+date.split(\"-\")[1]+\"/\"+date.split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"        location= location+str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"        pl.append(location)\r\n",
+					"    return pl  \r\n",
+					"locations=path(p)\r\n",
+					"locations"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def fd(x):\r\n",
+					"    loop=0\r\n",
+					"    try:\r\n",
+					"\r\n",
+					"        for i in range(len(locations)):     \r\n",
+					"            if i==x:\r\n",
+					"                df2_a = spark.read.load(locations[i], format='csv', header=True)\r\n",
+					"                df2_a=df2_a.toPandas()\r\n",
+					"        return df2_a\r\n",
+					"    except:\r\n",
+					"        print('Data not found!!')"
+				],
+				"execution_count": 61
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def date_df(df2,x):\r\n",
+					"            df2.sort_values(by=x,ascending=True,inplace=True)\r\n",
+					"            df2[x]=df2[x].astype(\"datetime64[ns]\")\r\n",
+					"            df2[\"Date\"]=pd.DatetimeIndex(df2[x]).date\r\n",
+					"            df2[\"Hour\"]=pd.DatetimeIndex(df2[x]).hour\r\n",
+					"            df2=df2[(df2[\"Hour\"]>=6) & (df2[\"Hour\"]<=23)]\r\n",
+					"            return df2"
+				],
+				"execution_count": 62
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df1=fd(0)\r\n",
+					"    df1_1=date_df(df1,\"ISTtime\")\r\n",
+					"    df_acme=df1_1[(df1_1['itemname']== r'\\\\APL\\1\\P\\ACME_PLANT_TODAYENERGY\\1')]\r\n",
+					"    df_acme1=df1_1[df1_1['itemname']== r'\\\\APL\\1\\P\\ACME_PLANT_IMPORT\\1']\r\n",
+					"except:\r\n",
+					"    print('Data not found for Acme')"
+				],
+				"execution_count": 63
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df2=fd(1)\r\n",
+					"    df2_1=date_df(df2,\"ISTtime\")\r\n",
+					"    df_antpr=df2_1[df2['itemname']=='MCR..PLANT_TOD_GEN.Today_Gen']\r\n",
+					"    df_antpr1=df2_1[df2_1['itemname']=='MCR..PLANT_TOD_IMPORT.Today_Gen']\r\n",
+					"except:\r\n",
+					"    print('Data not found for Ananthapuram')"
+				],
+				"execution_count": 64
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df3=fd(2)\r\n",
+					"    df3=date_df(df3,\"timestamp\")\r\n",
+					"    df4=fd(3)\r\n",
+					"    df4=date_df(df4,\"timestamp\")\r\n",
+					"    bik=pd.DataFrame()\r\n",
+					"    bik=bik.append(df3)\r\n",
+					"    bik=bik.append(df4)\r\n",
+					"    df_bik=bik[bik['itemname']=='MCR1..PLANT_TODAY_EXPORT_MWh']\r\n",
+					"    df_bik1=bik[bik['itemname']=='MCR1..PLANT_TODAY_IMPORT_MWh']\r\n",
+					"except:\r\n",
+					"    print('Data not found for bikaner')"
+				],
+				"execution_count": 65
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df6=fd(5)\r\n",
+					"    df6_1=date_df(df6,\"ISTtime\")\r\n",
+					"    df_phelan=df6_1[(df6_1['itemname']== 'PLANT_TODAY_EXP_KWH')]\r\n",
+					"    df_phelan1=df6_1[df6_1['itemname']== 'PLANT_TODAY_IMP_KWH']\r\n",
+					"except:\r\n",
+					"    print('Data not found for phelan')"
+				],
+				"execution_count": 66
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df7=fd(6)\r\n",
+					"    df7_1=date_df(df7,\"ISTtime\")\r\n",
+					"    df_p1=df7_1[df7['itemname']=='B2_MAIN_PLC..PLANT_150MW_TODAY_GENERATION_MWH']\r\n",
+					"    df_p1_imp=df7_1[df7_1['itemname']=='B2_MAIN_PLC..PLANT_150MW_TODAY_IMPORT_MWH']\r\n",
+					"except:\r\n",
+					"    print('data not found for p1')"
+				],
+				"execution_count": 67
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df8=fd(7)\r\n",
+					"    df8_1=date_df(df8,\"ISTtime\")\r\n",
+					"    df8_1['Date']=df8_1['Date'].astype(str)\r\n",
+					"    df8_1=df8_1[df8_1['Date']==str(DateList[DateLoopCounter])]\r\n",
+					"    df_p2=df8_1[(df8['itemname']=='PLANTDATA_ENY_EXP_TDAY')]\r\n",
+					"    df_p2_imp=df8_1[df8_1['itemname']=='PLANTDATA_ENY_IMP_TDAY']\r\n",
+					"except:\r\n",
+					"    print('Data not found for p2')"
+				],
+				"execution_count": 68
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df9=fd(8)\r\n",
+					"    df9_1=date_df(df9,\"ISTtime\")\r\n",
+					"    df_trnl=df9_1[df9['itemname']=='MCR..Line_TVM_Active_Export']\r\n",
+					"    df_trnl_1=df9_1[df9_1['itemname']=='MCR..Line_TVM_Active_Import']\r\n",
+					"except:\r\n",
+					"    print('Data not found for Tirunelveli')"
+				],
+				"execution_count": 69
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    df10=fd(9)\r\n",
+					"    df10_1=date_df(df10,\"ISTtime\")\r\n",
+					"    df_nargund=df10_1[df10['itemname']=='Channel1.CMX.PLANT_DATA\\ENY_TDAY']\r\n",
+					"    df_nargund_1=df9_1[df10_1['itemname']=='Channel1.CMX.PLANTDATA\\ENY_TDAY']\r\n",
+					"except:\r\n",
+					"    print('Data not found for Nargund')"
+				],
+				"execution_count": 70
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def max_d(df):\r\n",
+					"    df['value']=df['value'].astype(float)\r\n",
+					"    grouped_data=df.groupby(['itemname']).max()\r\n",
+					"    max_val=grouped_data['value'].sum()\r\n",
+					"    return max_val    "
+				],
+				"execution_count": 71
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_acme=max_d(df_acme)\r\n",
+					"    max_acme1=max_d(df_acme1)\r\n",
+					"    net_energy=(max_acme-max_acme1)*0.995\r\n",
+					"    list_val=[]\r\n",
+					"    #l1=[\"MSEDCL 250MW (Acme)\",str(DateList[DateLoopCounter]),max_acme,max_acme1,0.995]\r\n",
+					"    l1=[\"MSEDCL 250MW (Acme)\",str(todaydate),max_acme,max_acme1,0.995,net_energy]\r\n",
+					"    list_val.append(l1)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 80
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_antpr=max_d(df_antpr)\r\n",
+					"    max_antpr1=max_d(df_antpr1)\r\n",
+					"    net_energy1=(max_antpr-max_antpr1)*0.996\r\n",
+					"    #l2=[\"Ananthapuram 250MW\",str(DateList[DateLoopCounter]),max_antpr,max_antpr1,0.996]\r\n",
+					"    l2=[\"Ananthapuram 250MW\",str(todaydate),max_antpr,max_antpr1,0.996,net_energy1]\r\n",
+					"    list_val.append(l2)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 81
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_phelan=max_d(df_phelan)\r\n",
+					"    max_phelan1=max_d(df_phelan1) \r\n",
+					"    net_energy3=(max_phelan-max_phelan1)*0.995\r\n",
+					"    #l3=[\"Bhadla 50MW (Phelan)\",str(DateList[DateLoopCounter]),max_phelan,max_phelan1,0.995]\r\n",
+					"    l3=[\"Bhadla 50MW (Phelan)\",str(todaydate),max_phelan,max_phelan1,0.995,net_energy3]\r\n",
+					"    list_val.append(l3)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 82
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_pav1=max_d(df_p1)/1000\r\n",
+					"    max_pav1_imp=max_d(df_p1_imp)/1000\r\n",
+					"    net_energy4=(max_pav-max_pav1_imp)*0.991\r\n",
+					"    #l4=[\"P1\",str(DateList[DateLoopCounter]),max_pav1,max_pav1_imp,0.991]\r\n",
+					"    l4=[\"P1\",str(todaydate),max_pav1,max_pav1_imp,0.991,net_energy4]\r\n",
+					"    list_val.append(l4)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 84
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_pav22=max_d(df_p2)/1000\r\n",
+					"    max_pav22_imp=max_d(df_p2_imp)/1000\r\n",
+					"    net_energy5=(max_pav22-max_pav22_imp)*0.991\r\n",
+					"    #l5=[\"P2\",str(DateList[DateLoopCounter]),max_pav22,max_pav22_imp,0.991]\r\n",
+					"    l5=[\"P2\",str(todaydate),max_pav22,max_pav22_imp,0.991,net_energy5]\r\n",
+					"    list_val.append(l5)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 85
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_pav=(max_pav1+max_pav22).round(decimals=2)\r\n",
+					"    max_pav1=(max_pav1_imp+max_pav22_imp).round(decimals=2)\r\n",
+					"    net_pav=(max_pav-max_pav1)*0.991\r\n",
+					"    #l6=[\"Pavagada 300MW\",str(DateList[DateLoopCounter]),max_pav,max_pav1,0.991]\r\n",
+					"    l6=[\"Pavagada 300MW\",str(todaydate),max_pav,max_pav1,0.991,net_pav]\r\n",
+					"    list_val.append(l6)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 86
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_bik=(max_d(df_bik)).round(decimals=2)\r\n",
+					"    max_bik1=(max_d(df_bik1)).round(decimals=2)\r\n",
+					"    net_bik=(max_bik-max_bik1)*0.995\r\n",
+					"    #l7=[\"Bikaner 300MW\",str(DateList[DateLoopCounter]),max_bik,max_bik1,0.995]\r\n",
+					"    l7=[\"Bikaner 300MW\",str(todaydate),max_bik,max_bik1,0.995,net_bik]\r\n",
+					"    list_val.append(l7)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 87
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    max_trnl=(max_d(df_trnl)/1000).round(decimals=2)\r\n",
+					"    max_trnl1=(max_d(df_trnl_1)/1000).round(decimals=2)\r\n",
+					"    net_trnl=(max_trnl-max_trnl1)*0.996\r\n",
+					"    #l8=[\"Tirunelveli 100MW\",str(DateList[DateLoopCounter]),max_trnl,max_trnl1,0.996]\r\n",
+					"    l8=[\"Tirunelveli 100MW\",str(todaydate),max_trnl,max_trnl1,0.996,net_trnl]\r\n",
+					"    list_val.append(l8)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 88
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dataframe=pd.DataFrame(list_val,columns=['SPP',\"Date\",'Export','Import','Value','Net_Revenue'])\r\n",
+					"dataframe"
+				],
+				"execution_count": 89
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"static_antpr=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Ananthapuram')\r\n",
+					"static_acme=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Acme')\r\n",
+					"static_bikaner=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Bikaner')\r\n",
+					"static_pavagada=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Pavagada')\r\n",
+					"#static_chikodi=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/static_file.xlsx',sheet_name='Chikodi')\r\n",
+					"static_phelan=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Phelan')\r\n",
+					"static_pavagada.rename(columns = {'Date  ':'Date'}, inplace = True)\r\n",
+					"static_trnl=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Sheet1')\r\n",
+					""
+				],
+				"execution_count": 91
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"final_df=pd.DataFrame()\r\n",
+					"column_names=[\"SPP\",\"Date\",\"Budgeted_Today\",\"Actual_Today\"]\r\n",
+					"dff=pd.DataFrame(columns=column_names)\r\n",
+					"dff"
+				],
+				"execution_count": 92
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def app(dff,max_val,max_val1,static,SPP,df,data_df):\r\n",
+					"    data_df['Value']=data_df['Value'].apply(lambda x:float(x))\r\n",
+					"    dff['SPP']=SPP\r\n",
+					"    y=data_df[data_df['SPP']==SPP]\r\n",
+					"    y['Value']=y['Value'].apply(lambda x:float(x))\r\n",
+					"    val=static['Per Unit Price'].unique()\r\n",
+					"    dff['Actual_Today']=((([max_val-max_val1]*val*1000)*y['Value'])/100000).round(decimals=2)\r\n",
+					"    dff['Date']=df['Date'].unique()\r\n",
+					"    x=static[static[\"Date\"].isin(dff[\"Date\"])]\r\n",
+					"    n=x['Budgeted']\r\n",
+					"    n=float(n)\r\n",
+					"    dff['Budgeted_Today']=((n*val*1000)/100000).round(decimals=2)\r\n",
+					"    dff['Budgeted MTD']=dff['Budgeted_Today']\r\n",
+					"    dff['Actual MTD']=dff['Actual_Today']\r\n",
+					"    dff['Budgeted YTD']=dff['Budgeted_Today']\r\n",
+					"    dff['Actual YTD']=dff['Actual_Today']\r\n",
+					"    dff=dff[['SPP','Date','Budgeted_Today','Actual_Today','Budgeted MTD','Actual MTD','Budgeted YTD','Actual YTD']]\r\n",
+					"    return dff\r\n",
+					"    #try"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def app(dff,max_val,max_val1,static,SPP,df):\r\n",
+					"    try:\r\n",
+					"        val=static['Per Unit Price'].unique()\r\n",
+					"        #value=file['Value']\r\n",
+					"        dff['Actual_Today']=(([max_val-max_val1]*val*1000)/100000).round(decimals=2)\r\n",
+					"        dff['Date']=df['Date'].unique()\r\n",
+					"        x=static[static[\"Date\"].isin(dff[\"Date\"])]\r\n",
+					"        print(x)\r\n",
+					"        n=x['Budgeted']\r\n",
+					"        n=float(n)\r\n",
+					"        dff['Budgeted_Today']=((n*val*1000)/100000).round(decimals=2)\r\n",
+					"        dff['SPP']=SPP\r\n",
+					"        dff['Budgeted MTD']=dff['Budgeted_Today']\r\n",
+					"        dff['Actual MTD']=dff['Actual_Today']\r\n",
+					"        dff['Budgeted YTD']=dff['Budgeted_Today']\r\n",
+					"        dff['Actual YTD']=dff['Actual_Today']\r\n",
+					"        dff=dff[['SPP','Date','Budgeted_Today','Actual_Today','Budgeted MTD','Actual MTD','Budgeted YTD','Actual YTD']]\r\n",
+					"        return dff\r\n",
+					"    except:\r\n",
+					"        print(\"No data Found\")"
+				],
+				"execution_count": 93
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    #data1=app(dff,max_acme,max_acme1,static_acme,'Acme',df_acme,dataframe)\r\n",
+					"    data1=app(dff,max_acme,max_acme1,static_acme,\"MSEDCL 250MW (Acme)\",df_acme)\r\n",
+					"    data1\r\n",
+					"    final_df=final_df.append(data1)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 94
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    #data2=app(dff,max_antpr,max_antpr1,static_antpr,\"Ananthpuram\",df_antpr,dataframe)\r\n",
+					"    data2=app(dff,max_antpr,max_antpr1,static_antpr,\"Ananthapuram 250MW\",df_antpr)\r\n",
+					"    data2\r\n",
+					"    final_df=final_df.append(data2)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 95
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dt=[df_antpr,df_acme,df_bik,df_phelan,df_p1]\r\n",
+					"maxx=[max_antpr,max_acme,max_bik,max_phelan,max_pav]\r\n",
+					"max1=[max_antpr1,max_acme1,max_bik1,max_phelan1,max_pav1]\r\n",
+					"sp=[\"Ananthpuram\",\"Acme\",\"Bikaner\",\"Phelan\",\"Pavagada\"]\r\n",
+					"st=[static_antpr,static_acme,static_bikaner,static_phelan,static_pavagada]\r\n",
+					"for (a,b,c,d,e) in zip(dt,maxx,max1,sp,st):\r\n",
+					"    data2=app(dff,b,c,e,d,a,dataframe)\r\n",
+					"    final_df=final_df.append(data2)"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    #data3=app(dff,max_phelan,max_phelan1,static_phelan,'Phelan',df_phelan,dataframe)\r\n",
+					"    data3=app(dff,max_phelan,max_phelan1,static_phelan,'Bhadla 50MW (Phelan)',df_phelan)\r\n",
+					"    data3\r\n",
+					"    final_df=final_df.append(data3)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 96
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    #data4=app(dff,max_bik,max_bik1,static_bikaner,'Bikaner',df_bik,dataframe)\r\n",
+					"    data4=app(dff,max_bik,max_bik1,static_bikaner,'Bikaner 300MW',df_bik)\r\n",
+					"    data4\r\n",
+					"    final_df=final_df.append(data4)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 97
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    #data5=app(dff,max_pav,max_pav1,static_pavagada,\"Pavagada\",df_p1,dataframe)\r\n",
+					"    data5=app(dff,max_pav,max_pav1,static_pavagada,\"Pavagada 300MW\",df_p1)\r\n",
+					"    data5\r\n",
+					"    final_df=final_df.append(data5)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 98
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    #data5=app(dff,max_pav,max_pav1,static_pavagada,\"Pavagada\",df_p1,dataframe)\r\n",
+					"    data6=app(dff,max_trnl,max_trnl1,static_trnl,\"Tirunelveli 100MW\",df9_1)\r\n",
+					"    data6\r\n",
+					"    final_df=final_df.append(data6)\r\n",
+					"except:\r\n",
+					"    print('no data')"
+				],
+				"execution_count": 99
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"final_df"
+				],
+				"execution_count": 100
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dataframe1=dataframe[['SPP','Value']]\r\n",
+					"data_df=pd.merge(final_df,dataframe1,on='SPP',how='inner')\r\n",
+					"data_df['Actual_Today']=(data_df['Actual_Today']*data_df['Value']).round(decimals=2)\r\n",
+					"data_df.drop(['Value'],axis=1,inplace=True)"
+				],
+				"execution_count": 101
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data_df"
+				],
+				"execution_count": 102
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"final_df['Date']=pd.to_datetime(final_df[\"Date\"], format=\"%Y/%m/%d\")\r\n",
+					"final_df"
+				],
+				"execution_count": 103
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"static=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Revenue')\r\n",
+					"#static=static.loc[static['Date']=='2022-12-12']\r\n",
+					"static=static.loc[static['Date']==str(DateList[DateLoopCounter])]\r\n",
+					"static"
+				],
+				"execution_count": 104
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"file_df=static[static[\"SPP\"].isin(final_df[\"SPP\"])]\r\n",
+					"file_df"
+				],
+				"execution_count": 105
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data=pd.concat([file_df,final_df])"
+				],
+				"execution_count": 106
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data['Date']=pd.to_datetime(data['Date'])\r\n",
+					"final_df.Date = pd.to_datetime(final_df.Date) \r\n",
+					"def final(data1,data2):\r\n",
+					"    if data1.Date.dt.day.all==1:\r\n",
+					"        if data1.Date.dt.month.all!=4 :\r\n",
+					"                df=data2.groupby('SPP',as_index=False).agg({'Budgeted YTD':'sum','Actual YTD':'sum'})\r\n",
+					"                y=data[['SPP','Date','Budgeted_Today','Actual_Today','Budgeted MTD','Actual MTD']]\r\n",
+					"                data_final=pd.merge(y,df,how='right',on='SPP')\r\n",
+					"                return data_final\r\n",
+					"        else :\r\n",
+					"            return data1\r\n",
+					"    else :\r\n",
+					"        df=data2.groupby('SPP',as_index=False).agg({'Budgeted MTD':'sum','Actual MTD':'sum','Budgeted YTD':'sum','Actual YTD':'sum'})\r\n",
+					"        y=data1[['SPP','Date','Budgeted_Today','Actual_Today']]\r\n",
+					"        data_final=pd.merge(y,df,how='right',on='SPP') \r\n",
+					"        return data_final"
+				],
+				"execution_count": 107
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_revenue=final(final_df,data)\r\n",
+					"df_revenue1=df_revenue.dropna(axis=0)"
+				],
+				"execution_count": 108
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_revenue1"
+				],
+				"execution_count": 109
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Revenue')\r\n",
+					"db"
+				],
+				"execution_count": 110
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db1=db.append(df_revenue1)\r\n",
+					"db1.to_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/main_file.xlsx',sheet_name='Revenue')"
+				],
+				"execution_count": 111
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db1"
+				],
+				"execution_count": 112
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#to run it on vm to append in excel\r\n",
+					"#from openpyxl import load_workbook\r\n",
+					"#filename = \"Revenue_file.xlsx\"\r\n",
+					"#workbook = load_workbook(filename)\r\n",
+					"#writer = pd.ExcelWriter(filename, engine='openpyxl')\r\n",
+					"#writer.book = workbook\r\n",
+					"#writer.sheets = {ws.title: ws for ws in workbook.worksheets}\r\n",
+					"#df_revenue1.to_excel(writer, startrow=writer.sheets['Sheet1'].max_row, index = False, header= False)\r\n",
+					"#writer.close()\r\n",
+					"#to run it on vm to append in csv\r\n",
+					"#df_revenue.to_csv('Revenue.csv', mode='a', index = False, header=None)(in jupyter notebook)"
+				],
+				"execution_count": 41
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**Code to run for mail**"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"blankIndex=[''] * len(file)\r\n",
+					"file.index=blankIndex\r\n",
+					"file"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import win32com.client\r\n",
+					"import pandas as pd\r\n",
+					"table = df_revenue1\r\n",
+					"subject = 'Test mail(confidential)'\r\n",
+					"body = '<html><body>'+ table.to_html() + '</body></html>'\r\n",
+					"#body = '<html><body>' table '</body></html>'\r\n",
+					"body2='Following mail contains Budgeted & Actual Revenue information'\r\n",
+					"recipients = ['sahana@ayanapower.com']\r\n",
+					"for i in recipients:\r\n",
+					"    attachments = []\r\n",
+					"    olMailItem = 0x0\r\n",
+					"    obj = win32com.client.Dispatch(\"Outlook.Application\")\r\n",
+					"    newMail = obj.CreateItem(olMailItem)\r\n",
+					"    newMail.Subject = subject\r\n",
+					"    newMail.HTMLBody= body2\r\n",
+					"    newMail.HTMLBody = body\r\n",
+					"    newMail.To =i\r\n",
+					"    print(i)  \r\n",
+					"    for location in attachments:\r\n",
+					"        newMail.Attachments.Add(Source=location)\r\n",
+					"\r\n",
+					"    newMail.display()\r\n",
+					"    newMail.Send()"
+				]
+			}
+		]
+	}
+}

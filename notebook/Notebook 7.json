@@ -1,0 +1,1371 @@
+{
+	"name": "Notebook 7",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "8fbd1b0a-576b-4ffe-b61f-02e2a070dd1c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1",
+				"state": {
+					"ec67b318-a1be-4888-a3f4-f811d7149a5a": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "1",
+										"1": "1",
+										"2": "Raj"
+									},
+									{
+										"0": "2",
+										"1": "2",
+										"2": "Ravi"
+									},
+									{
+										"0": "3",
+										"1": "3",
+										"2": "Hari"
+									},
+									{
+										"0": "4",
+										"1": "4",
+										"2": "Rajesh"
+									},
+									{
+										"0": "5",
+										"1": "5",
+										"2": "Jai"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "ID2",
+										"type": "bigint"
+									},
+									{
+										"key": "2",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"8b5922a3-f48f-4e9c-a550-2b8f671f5d68": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "4",
+										"1": "4",
+										"2": "Rajesh"
+									},
+									{
+										"0": "3",
+										"1": "3",
+										"2": "Hari"
+									},
+									{
+										"0": "2",
+										"1": "2",
+										"2": "Ravi"
+									},
+									{
+										"0": "5",
+										"1": "5",
+										"2": "Jai"
+									},
+									{
+										"0": "1",
+										"1": "1",
+										"2": "Raj"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "ID2",
+										"type": "bigint"
+									},
+									{
+										"key": "2",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"4130d087-86cd-4290-8445-e12ad7a6d065": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "4",
+										"1": "Rajesh"
+									},
+									{
+										"0": "3",
+										"1": "Hari"
+									},
+									{
+										"0": "2",
+										"1": "Ravi"
+									},
+									{
+										"0": "5",
+										"1": "Jai"
+									},
+									{
+										"0": "1",
+										"1": "Raj"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"4ed42b05-9d9f-4429-bd5b-30b9a3190d77": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "4",
+										"1": "Rajesh"
+									},
+									{
+										"0": "3",
+										"1": "Hari"
+									},
+									{
+										"0": "2",
+										"1": "Ravi"
+									},
+									{
+										"0": "5",
+										"1": "Jai"
+									},
+									{
+										"0": "1",
+										"1": "Raj"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"af598a9e-b6de-471b-bdc3-7d2c7a0ba959": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "4",
+										"1": "Rajesh"
+									},
+									{
+										"0": "2",
+										"1": "Ravi"
+									},
+									{
+										"0": "3",
+										"1": "Hari"
+									},
+									{
+										"0": "5",
+										"1": "Jai"
+									},
+									{
+										"0": "1",
+										"1": "Raj"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"d21529ae-4e59-4e84-927d-b8bf4933673b": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "4",
+										"1": "Rajesh"
+									},
+									{
+										"0": "2",
+										"1": "Ravi"
+									},
+									{
+										"0": "3",
+										"1": "Hari"
+									},
+									{
+										"0": "5",
+										"1": "Jai"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"9953496a-42a4-4719-99d7-2bbce5c46e8a": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "1",
+										"1": "2022-03-16 05:54:16.264",
+										"4": "DELETE",
+										"5": {
+											"predicate": "[\"(spark_catalog.test.table1.`ID` = 1L)\"]"
+										},
+										"9": "0",
+										"11": "false",
+										"12": {
+											"numRemovedFiles": "1",
+											"numCopiedRows": "0",
+											"executionTimeMs": "4086",
+											"numDeletedRows": "1",
+											"scanTimeMs": "2307",
+											"numAddedFiles": "1",
+											"rewriteTimeMs": "1778"
+										}
+									},
+									{
+										"0": "0",
+										"1": "2022-03-15 11:27:53.457",
+										"4": "CREATE TABLE AS SELECT",
+										"5": {
+											"isManaged": "true",
+											"description": null,
+											"partitionBy": "[]",
+											"properties": "{}"
+										},
+										"11": "true",
+										"12": {
+											"numFiles": "5",
+											"numOutputBytes": "3357",
+											"numOutputRows": "5"
+										}
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "version",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "timestamp",
+										"type": "timestamp"
+									},
+									{
+										"key": "2",
+										"name": "userId",
+										"type": "string"
+									},
+									{
+										"key": "3",
+										"name": "userName",
+										"type": "string"
+									},
+									{
+										"key": "4",
+										"name": "operation",
+										"type": "string"
+									},
+									{
+										"key": "5",
+										"name": "operationParameters",
+										"type": "MapType(StringType,StringType,true)"
+									},
+									{
+										"key": "6",
+										"name": "job",
+										"type": "StructType(StructField(jobId,StringType,true), StructField(jobName,StringType,true), StructField(runId,StringType,true), StructField(jobOwnerId,StringType,true), StructField(triggerType,StringType,true))"
+									},
+									{
+										"key": "7",
+										"name": "notebook",
+										"type": "StructType(StructField(notebookId,StringType,true))"
+									},
+									{
+										"key": "8",
+										"name": "clusterId",
+										"type": "string"
+									},
+									{
+										"key": "9",
+										"name": "readVersion",
+										"type": "bigint"
+									},
+									{
+										"key": "10",
+										"name": "isolationLevel",
+										"type": "string"
+									},
+									{
+										"key": "11",
+										"name": "isBlindAppend",
+										"type": "boolean"
+									},
+									{
+										"key": "12",
+										"name": "operationMetrics",
+										"type": "MapType(StringType,StringType,true)"
+									},
+									{
+										"key": "13",
+										"name": "userMetadata",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"6b7fb1d1-3aa7-4c27-a915-f3fc92a1506a": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "4",
+										"1": "Rajesh"
+									},
+									{
+										"0": "2",
+										"1": "Ravi"
+									},
+									{
+										"0": "3",
+										"1": "Hari"
+									},
+									{
+										"0": "5",
+										"1": "Jai"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "ID",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "Name",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"db69f85a-5afc-41b5-9066-f5af341e47de": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "12",
+										"1": "21",
+										"2": "24",
+										"3": "8"
+									},
+									{
+										"0": "21",
+										"1": "18",
+										"2": "2",
+										"3": "18"
+									},
+									{
+										"0": "0",
+										"1": "6",
+										"2": "8",
+										"3": "1"
+									},
+									{
+										"0": "23",
+										"1": "16",
+										"2": "11",
+										"3": "16"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "A",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "B",
+										"type": "bigint"
+									},
+									{
+										"key": "2",
+										"name": "C",
+										"type": "bigint"
+									},
+									{
+										"key": "3",
+										"name": "D",
+										"type": "bigint"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"3534b68f-dd02-47bf-bb80-d22e9f47622d": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "24",
+										"1": "14"
+									},
+									{
+										"0": "6",
+										"1": "16"
+									},
+									{
+										"0": "17",
+										"1": "0"
+									},
+									{
+										"0": "4",
+										"1": "7"
+									},
+									{
+										"0": "15",
+										"1": "4"
+									},
+									{
+										"0": "11",
+										"1": "6"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "A",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "B",
+										"type": "bigint"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					},
+					"23897c13-6dcf-4aef-b0a0-e8da97633b3c": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "0",
+										"1": "6",
+										"2": "8",
+										"3": "1"
+									},
+									{
+										"0": "12",
+										"1": "21",
+										"2": "24",
+										"3": "8"
+									},
+									{
+										"0": "23",
+										"1": "16",
+										"2": "11",
+										"3": "16"
+									},
+									{
+										"0": "21",
+										"1": "18",
+										"2": "2",
+										"3": "18"
+									},
+									{
+										"0": "24",
+										"1": "14"
+									},
+									{
+										"0": "4",
+										"1": "7"
+									},
+									{
+										"0": "15",
+										"1": "4"
+									},
+									{
+										"0": "17",
+										"1": "0"
+									},
+									{
+										"0": "11",
+										"1": "6"
+									},
+									{
+										"0": "6",
+										"1": "16"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "A",
+										"type": "bigint"
+									},
+									{
+										"key": "1",
+										"name": "B",
+										"type": "bigint"
+									},
+									{
+										"key": "2",
+										"name": "C",
+										"type": "bigint"
+									},
+									{
+										"key": "3",
+										"name": "D",
+										"type": "bigint"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
+				"name": "sparkpool1",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df=pd.DataFrame({\"ID\":[1,2,3,4,5],\r\n",
+					"                 \"ID2\":[1,2,3,4,5],\r\n",
+					"                 \"Name\":[\"Raj\",\"Ravi\",\"Hari\",\"Rajesh\",\"Jai\"] })\r\n",
+					"df"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"dfsp=spark.createDataFrame(df)\r\n",
+					"display(dfsp)\r\n",
+					""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"create database if not exists test\")\r\n",
+					"dfsp.write.format(\"delta\").mode(\"append\").saveAsTable(\"test.table1\")"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"select * from test.table1\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.printSchema()"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=df.drop(\"ID2\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"drop table test.table1\")"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"display(df)"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.write.format(\"delta\").mode(\"append\").saveAsTable(\"test.table1\")"
+				],
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"select * from test.table1\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"delete from test.table1 where test.table1.ID=1\")"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"select * from test.table1\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"refresh table test.table1\")"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pyarrow"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"from delta.tables import *\r\n",
+					"deltaTable = DeltaTable.forPath(spark, \"abfss://devlop@ayanadatalake.dfs.core.windows.net/synapse/workspaces/azure-synapse-devlop/warehouse/test.db/table1/\")\r\n",
+					"\r\n",
+					"fullHistoryDF = deltaTable.history()    # get the full history of the table\r\n",
+					"\r\n",
+					"lastOperationDF = deltaTable.history(1)\r\n",
+					"display(fullHistoryDF)"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from delta.tables import *\r\n",
+					"deltaTable = DeltaTable.forPath(spark, \"abfss://devlop@ayanadatalake.dfs.core.windows.net/synapse/workspaces/azure-synapse-devlop/warehouse/test.db/table1/\")\r\n",
+					"spark.sql(\"SET spark.databricks.delta.retentionDurationCheck.enabled=false\")\r\n",
+					"deltaTable.vacuum(0) "
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"seleCT * from test.table1\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import numpy as np\r\n",
+					"df1 = pd.DataFrame(np.random.randint(25, size=(4, 4)),\r\n",
+					"                   index=[\"1\", \"2\", \"3\", \"4\"],\r\n",
+					"                   columns=[\"A\", \"B\", \"C\", \"D\"])\r\n",
+					" \r\n",
+					"#df2 = pd.DataFrame(np.random.randint(25, size=(6, 2)),\r\n",
+					"                   #index=[\"5\", \"6\", \"7\", \"8\", \"9\", \"10\"],\r\n",
+					"                   #columns=[\"A\", \"B\"])\r\n",
+					" \r\n",
+					"#df=pd.concat((df1,df2),axis=0)\r\n",
+					"df1"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"dfsp=spark.createDataFrame(df1)\r\n",
+					"display(dfsp)"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"create database if not exists test\")\r\n",
+					"dfsp.write.format(\"delta\").mode(\"append\").saveAsTable(\"test.table2\")"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2 = pd.DataFrame(np.random.randint(25, size=(6, 2)),\r\n",
+					"                   index=[\"5\", \"6\", \"7\", \"8\", \"9\", \"10\"],\r\n",
+					"                   columns=[\"A\", \"B\"])\r\n",
+					" \r\n",
+					"#df=pd.concat((df1,df2),axis=0)\r\n",
+					"df2"
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"dfsp=spark.createDataFrame(df2)\r\n",
+					"display(dfsp)"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"create database if not exists test\")\r\n",
+					"dfsp.write.format(\"delta\").mode(\"append\").saveAsTable(\"test.table2\")"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"select * from test.table2\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

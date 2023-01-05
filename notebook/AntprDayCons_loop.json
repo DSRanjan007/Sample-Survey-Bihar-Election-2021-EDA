@@ -1,0 +1,556 @@
+{
+	"name": "AntprDayCons_loop",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for DayConsolidated at Portfolio level.",
+		"folder": {
+			"name": "Ananthapur"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "ef1c64c3-fee4-456a-a8d8-09547f45d2a8"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
+				"name": "sparkpool1",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**ANTPR DayConslidated Tables with Portfolio Level KPIs**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"#import pymsteams"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from datetime import date\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"start_date = date(2022,3,18)\r\n",
+					"days=abs(todaydate-start_date).days\r\n",
+					"days"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= days :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"#print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0\r\n",
+					"\r\n",
+					"location1 = pattoreadparquet   \r\n",
+					"DateList=DateList[::-1]\r\n",
+					"print(DateList)\r\n",
+					"#location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
+					"#print(location1)"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#str(DateList[0])\r\n",
+					"ml1=[str(DateList[i]) for i in range(len(DateList))]\r\n",
+					"tuple(ml1)"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"for i in range(len(DateList)):\r\n",
+					"    location1= location1+ str(DateList[i])+str(\"/\")\r\n",
+					"    print(location1)\r\n",
+					"    df2=pd.read_parquet(location1)\r\n",
+					"    #df2=pd.read_parquet(\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=2022-02-19/part-00000-513a047b-d8be-4f4c-99b7-ee9a7d89a754.c000.snappy.parquet\")\r\n",
+					"    df2.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"    df2.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"    df2=df2[df2[\"sitename\"]==\"ananthpuram\"]\r\n",
+					"    df2.drop([\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\",\"siteid\",\"sitename\"],axis=1,inplace=True)\r\n",
+					"    df2[\"ISTtime\"]=df2[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"    df2[\"Date\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).date\r\n",
+					"    df2[\"Time\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).time\r\n",
+					"    df2[\"Hour\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).hour\r\n",
+					"    df2[\"Minute\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).minute\r\n",
+					"    df2=df2[(df2[\"Hour\"]>=6) & (df2[\"Hour\"]<=19)]\r\n",
+					"    #df2.head()\r\n",
+					"\r\n",
+					"    df2.drop([\"Date\",\"Time\",\"Hour\",\"Minute\"],axis=1,inplace=True)\r\n",
+					"    #df2.head()\r\n",
+					"\r\n",
+					"    df2=df2.copy()\r\n",
+					"    #df2.head()\r\n",
+					"\r\n",
+					"    b1=[]\r\n",
+					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
+					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"\r\n",
+					"    Tm1_list=[\"ICR8..MT1.MODULE_TEMP\",\"ICR10..MT1.MODULE_TEMP\",\"ICR12..MT.MODULE_TEMP\",\"ICR12..MT.MODULE_TEMP_1\",\"ICR12..MT1.MODULE_TEMP\",\"ICR12..MT1.MODULE_TEMP_1\",\"ICR13..MT1.MODULE_TEMP\",\"ICR13..MT1.MODULE_TEMP1\"]\r\n",
+					"    avg_Tm1_list=[]\r\n",
+					"    final_avg_Tm1_list=[]\r\n",
+					"    for i in Tm1_list:\r\n",
+					"        avg_Tm1_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"    max_value_Tm1=max(avg_Tm1_list)\r\n",
+					"    final_reference_value_Tm1=max_value_Tm1-max_value_Tm1*0.02\r\n",
+					"    for i in range(len(avg_Tm1_list)):\r\n",
+					"        if avg_Tm1_list[i]>=final_reference_value_Tm1:\r\n",
+					"            final_avg_Tm1_list.append(avg_Tm1_list[i])\r\n",
+					"            \r\n",
+					"    b1_inv_list=[\"ICR8..INV1.TODAY_GEN\",\"ICR8..INV2.TODAY_GEN\",\"ICR8..INV3.TODAY_GEN\",\"ICR8..INV4.TODAY_GEN\",\"ICR10..INV1.TODAY_GEN\",\"ICR10..INV2.TODAY_GEN\",\"ICR10..INV3.TODAY_GEN\",\"ICR10..INV4.TODAY_GEN\",\"ICR12..INV1.TODAY_GEN\",\"ICR12..INV2.TODAY_GEN\",\"ICR12..INV3.TODAY_GEN\",\"ICR12..INV4.TODAY_GEN\",\"ICR13..INV1.TODAY_GEN\",\"ICR13..INV2.TODAY_GEN\",\"ICR13..INV3.TODAY_GEN\",\"ICR13..INV4.TODAY_GEN\"]\r\n",
+					"\r\n",
+					"    b1.append(Block_name_list[0])\r\n",
+					"    b1.append(pd.Series(str(df2[\"ISTtime\"][:1])).str.split(\" \")[0][3])\r\n",
+					"    b1.append(DC_Capacity_list[0])\r\n",
+					"    b1.append(df2[df2[\"itemname\"]==\"MCR..B1_ICR13_GHI_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\"][\"value\"].max())\r\n",
+					"    b1.append(df2[df2[\"itemname\"]==\"MCR..B1_ICR13_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\"][\"value\"].max())\r\n",
+					"    b1.append(df2[df2[\"itemname\"]==\"ICR13..WMS.AMBIENT_TEMP\"][\"value\"].mean())\r\n",
+					"    b1.append(np.mean(final_avg_Tm1_list))\r\n",
+					"    b1.append(df2[df2[\"itemname\"]==\"ICR13..WMS.RELATIVE_HUMDITY\"][\"value\"].mean())\r\n",
+					"    InvEnergy=0\r\n",
+					"    for i in b1_inv_list:\r\n",
+					"        InvEnergy+=df2[df2[\"itemname\"]==i][\"value\"].max()\r\n",
+					"    b1.append(InvEnergy/1000)\r\n",
+					"    b1.append(df2[df2[\"itemname\"]==\"MCR..B1_TOTAL_INV_DOWN_MINS\"][\"value\"].max())\r\n",
+					"    b1.append(df2[df2[\"itemname\"]==\"MCR..B1_Peak_MW.Active_power\"][\"value\"].max())\r\n",
+					"    b1.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_CO2_REDUCTION\")][\"value\"].max()/5)\r\n",
+					"    b1.append(df2[(df2[\"itemname\"]==\"MCR..B1_EXPORT_ENERGY.Today_Gen\")][\"value\"].max())\r\n",
+					"\r\n",
+					"    b1.append( (df2[(df2[\"itemname\"]==\"MCR..B1_OG1_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()) + (df2[(df2[\"itemname\"]==\"MCR..B1_OG2_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()))\r\n",
+					"    b1.append(df2[(df2[\"itemname\"]==\"MCR..B1_PLT_AV\")][\"value\"].max())\r\n",
+					"    b1.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_GRID_AVAILABILITY\")][\"value\"].max()/5)\r\n",
+					"\r\n",
+					"    b2=[]\r\n",
+					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
+					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"\r\n",
+					"    Tm2_list=[\"ICR16..MT1.MODULE_TEMP\",\"ICR16..MT2.MODULE_TEMP\",\"ICR17..MT1.MODULE_TEMP_1\",\"ICR17..MT1.MODULE_TEMP_2\",\"ICR17..MT2.MODULE_TEMP_1\",\"ICR17..MT2.MODULE_TEMP_2\",\"ICR18..MT1.MODULE_TEMP\"]\r\n",
+					"    avg_Tm2_list=[]\r\n",
+					"    final_avg_Tm2_list=[]\r\n",
+					"    for i in Tm2_list:\r\n",
+					"        avg_Tm2_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"    max_value_Tm2=max(avg_Tm2_list)\r\n",
+					"    final_reference_value_Tm2=max_value_Tm2-max_value_Tm2*0.02\r\n",
+					"    for i in range(len(avg_Tm2_list)):\r\n",
+					"        if avg_Tm2_list[i]>=final_reference_value_Tm2:\r\n",
+					"            final_avg_Tm2_list.append(avg_Tm2_list[i])\r\n",
+					"            \r\n",
+					"    b2_inv_list=[\"ICR16..INV1.TODAY_GEN\",\"ICR16..INV2.TODAY_GEN\",\"ICR16..INV3.TODAY_GEN\",\"ICR16..INV4.TODAY_GEN\",\"ICR17..INV1.TODAY_GEN\",\"ICR17..INV2.TODAY_GEN\",\"ICR17..INV3.TODAY_GEN\",\"ICR17..INV4.TODAY_GEN\",\"ICR18..INV1.TODAY_GEN\",\r\n",
+					"    \"ICR18..INV2.TODAY_GEN\",\"ICR18..INV3.TODAY_GEN\",\"ICR18..INV4.TODAY_GEN\",\"ICR19..INV1.TODAY_GEN\",\"ICR19..INV2.TODAY_GEN\",\"ICR19..INV3.TODAY_GEN\",\"ICR19..INV4.TODAY_GEN\"]\r\n",
+					"\r\n",
+					"    GII_list=[\"MCR..B2_ICR16_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\",\"MCR..B2_ICR17_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\"]\r\n",
+					"    max_gii_list=[]\r\n",
+					"    final_max_gii_list=[]\r\n",
+					"    for i in GII_list:\r\n",
+					"        max_gii_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"    max_value_gii=max(max_gii_list)\r\n",
+					"    final_reference_value_gii=max_value_gii-max_value_gii*0.02\r\n",
+					"    for i in range(len(max_gii_list)):\r\n",
+					"        if max_gii_list[i]>=final_reference_value_gii:\r\n",
+					"            final_max_gii_list.append(max_gii_list[i]) \r\n",
+					"            \r\n",
+					"            \r\n",
+					"            \r\n",
+					"            \r\n",
+					"    b2.append(Block_name_list[1])\r\n",
+					"    b2.append(pd.Series(str(df2[\"ISTtime\"][:1])).str.split(\" \")[0][3])\r\n",
+					"    b2.append(DC_Capacity_list[1])\r\n",
+					"    b2.append(df2[df2[\"itemname\"]==\"MCR..B2_GHI_KWH.CALCULATED_IRRADIANCE\"][\"value\"].max())\r\n",
+					"    b2.append(np.mean(final_max_gii_list))\r\n",
+					"    b2.append(df2[df2[\"itemname\"]==\"ICR17..WMS.AMBIENT_TEMP\"][\"value\"].mean())\r\n",
+					"    b2.append(np.mean(final_avg_Tm2_list))\r\n",
+					"    b2.append(df2[df2[\"itemname\"]==\"ICR17..WMS.RELATIVE_HUMDITY\"][\"value\"].mean())\r\n",
+					"    InvEnergy=0\r\n",
+					"    for i in b2_inv_list:\r\n",
+					"        InvEnergy+=df2[df2[\"itemname\"]==i][\"value\"].max()\r\n",
+					"    b2.append(InvEnergy/1000)\r\n",
+					"    b2.append(df2[df2[\"itemname\"]==\"MCR..B2_TOTAL_INV_DOWN_MINS\"][\"value\"].max())\r\n",
+					"    b2.append(df2[df2[\"itemname\"]==\"MCR..B2_Peak_MW.Active_power\"][\"value\"].max())\r\n",
+					"    b2.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_CO2_REDUCTION\")][\"value\"].max()/5)\r\n",
+					"    b2.append(df2[(df2[\"itemname\"]==\"MCR..B2_EXPORT_ENERGY.Today_Gen\")][\"value\"].max())\r\n",
+					"\r\n",
+					"\r\n",
+					"    b2.append( (df2[(df2[\"itemname\"]==\"MCR..B2_OG1_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()) + (df2[(df2[\"itemname\"]==\"MCR..B2_OG2_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()))\r\n",
+					"    b2.append(df2[(df2[\"itemname\"]==\"MCR..B2_PLT_AV\")][\"value\"].max())\r\n",
+					"    b2.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_GRID_AVAILABILITY\")][\"value\"].max()/5)\r\n",
+					"\r\n",
+					"    b3=[]\r\n",
+					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
+					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"\r\n",
+					"    Tm3_list=[\"ICR1..MT1.MODULE_TEMP_1\",\"ICR1..MT1.MODULE_TEMP_2\",\"ICR1..MT2.MODULE_TEMP_1\",\"ICR1..MT2.MODULE_TEMP_2\",\"ICR2..MT1.MODULE_TEMP\",\"ICR3..MT1.MODULE_TEMP\",\"ICR4..MT1.MODULE_TEMP\",\"ICR4..MT1.MODULE_TEMP1\"]\r\n",
+					"    avg_Tm3_list=[]\r\n",
+					"    final_avg_Tm3_list=[]\r\n",
+					"    for i in Tm3_list:\r\n",
+					"        avg_Tm3_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"    max_value_Tm3=max(avg_Tm3_list)\r\n",
+					"    final_reference_value_Tm3=max_value_Tm3-max_value_Tm3*0.02\r\n",
+					"    for i in range(len(avg_Tm3_list)):\r\n",
+					"        if avg_Tm3_list[i]>=final_reference_value_Tm3:\r\n",
+					"            final_avg_Tm3_list.append(avg_Tm3_list[i])\r\n",
+					"            \r\n",
+					"    b3_inv_list=[\"ICR1..INV1.TODAY_GEN\",\"ICR1..INV2.TODAY_GEN\",\"ICR1..INV3.TODAY_GEN\",\"ICR1..INV4.TODAY_GEN\",\"ICR2..INV1.TODAY_GEN\",\"ICR2..INV2.TODAY_GEN\",\"ICR2..INV3.TODAY_GEN\",\"ICR2..INV4.TODAY_GEN\",\"ICR3..INV1.TODAY_GEN\",\"ICR3..INV2.TODAY_GEN\",\"ICR3..INV3.TODAY_GEN\",\"ICR3..INV4.TODAY_GEN\",\r\n",
+					"    \"ICR4..INV1.TODAY_GEN\",\"ICR4..INV2.TODAY_GEN\",\"ICR4..INV3.TODAY_GEN\",\"ICR4..INV4.TODAY_GEN\"]\r\n",
+					"\r\n",
+					"    GII_list=[\"MCR..B3_ICR1_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\",\"MCR..B3_ICR2_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\"]\r\n",
+					"    max_gii_list=[]\r\n",
+					"    final_max_gii_list=[]\r\n",
+					"    for i in GII_list:\r\n",
+					"        max_gii_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"    max_value_gii=max(max_gii_list)\r\n",
+					"    final_reference_value_gii=max_value_gii-max_value_gii*0.02\r\n",
+					"    for i in range(len(max_gii_list)):\r\n",
+					"        if max_gii_list[i]>=final_reference_value_gii:\r\n",
+					"            final_max_gii_list.append(max_gii_list[i]) \r\n",
+					"            \r\n",
+					"    b3.append(Block_name_list[2])\r\n",
+					"    b3.append(pd.Series(str(df2[\"ISTtime\"][:1])).str.split(\" \")[0][3])\r\n",
+					"    b3.append(DC_Capacity_list[2])\r\n",
+					"    b3.append(df2[df2[\"itemname\"]==\"MCR..B3_GHI_KWH.CALCULATED_IRRADIANCE\"][\"value\"].max())      \r\n",
+					"    b3.append(np.mean(final_max_gii_list))\r\n",
+					"    b3.append(df2[df2[\"itemname\"]==\"ICR1..WMS.AMBIENT_TEMP\"][\"value\"].mean())\r\n",
+					"    b3.append(np.mean(final_avg_Tm3_list))\r\n",
+					"    b3.append(df2[df2[\"itemname\"]==\"ICR1..WMS.RELATIVE_HUMDITY\"][\"value\"].mean())\r\n",
+					"    InvEnergy=0\r\n",
+					"    for i in b3_inv_list:\r\n",
+					"        InvEnergy+=df2[df2[\"itemname\"]==i][\"value\"].max()\r\n",
+					"    b3.append(InvEnergy/1000)\r\n",
+					"    b3.append(df2[df2[\"itemname\"]==\"MCR..B3_TOTAL_INV_DOWN_MINS\"][\"value\"].max())\r\n",
+					"    b3.append(df2[df2[\"itemname\"]==\"MCR..B3_Peak_MW.Active_power\"][\"value\"].max())\r\n",
+					"    b3.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_CO2_REDUCTION\")][\"value\"].max()/5)\r\n",
+					"    b3.append(df2[(df2[\"itemname\"]==\"MCR..B3_EXPORT_ENERGY.Today_Gen\")][\"value\"].max())\r\n",
+					"\r\n",
+					"\r\n",
+					"    b3.append( (df2[(df2[\"itemname\"]==\"MCR..B3_OG1_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()) + (df2[(df2[\"itemname\"]==\"MCR..B3_OG2_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()))\r\n",
+					"    b3.append(df2[(df2[\"itemname\"]==\"MCR..B3_PLT_AV\")][\"value\"].max())\r\n",
+					"    b3.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_GRID_AVAILABILITY\")][\"value\"].max()/5)\r\n",
+					"\r\n",
+					"    b4=[]\r\n",
+					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
+					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"\r\n",
+					"    Tm4_list=[\"ICR11..MT1.MODULE_TEMP\",\"ICR14..MT1.MODULE_TEMP\",\"ICR15..MT1.MODULE_TEMP\",\"ICR20..MT1.MODULE_TEMP\"]\r\n",
+					"    avg_Tm4_list=[]\r\n",
+					"    final_avg_Tm4_list=[]\r\n",
+					"    for i in Tm4_list:\r\n",
+					"        avg_Tm4_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"    max_value_Tm4=max(avg_Tm4_list)\r\n",
+					"    final_reference_value_Tm4=max_value_Tm4-max_value_Tm4*0.02\r\n",
+					"    for i in range(len(avg_Tm4_list)):\r\n",
+					"        if avg_Tm4_list[i]>=final_reference_value_Tm4:\r\n",
+					"            final_avg_Tm4_list.append(avg_Tm4_list[i])\r\n",
+					"            \r\n",
+					"    b4_inv_list=[\"ICR11..INV1.TODAY_GEN\",\"ICR11..INV2.TODAY_GEN\",\"ICR11..INV3.TODAY_GEN\",\"ICR11..INV4.TODAY_GEN\",\"ICR14..INV1.TODAY_GEN\",\"ICR14..INV2.TODAY_GEN\",\"ICR14..INV3.TODAY_GEN\",\"ICR14..INV4.TODAY_GEN\",\"ICR15..INV1.TODAY_GEN\",\"ICR15..INV2.TODAY_GEN\",\"ICR15..INV3.TODAY_GEN\",\"ICR15..INV4.TODAY_GEN\",\r\n",
+					"    \"ICR20..INV1.TODAY_GEN\",\"ICR20..INV2.TODAY_GEN\",\"ICR20..INV3.TODAY_GEN\",\"ICR20..INV4.TODAY_GEN\"]\r\n",
+					"\r\n",
+					"    GHI_list=[\"MCR..B4_GHI_KWH.CALCULATED_IRRADIANCE\",\"B4_ICR20..PYRANO.PYRANOMETER\"]\r\n",
+					"    max_list=[]\r\n",
+					"    final_max_list=[]\r\n",
+					"    for i in GHI_list:\r\n",
+					"        max_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"    max_value=max(max_list)\r\n",
+					"    final_reference_value=max_value-max_value*0.02\r\n",
+					"    for i in range(len(max_list)):\r\n",
+					"        if max_list[i]>=final_reference_value:\r\n",
+					"            final_max_list.append(max_list[i])\r\n",
+					"            \r\n",
+					"    b4.append(Block_name_list[3])\r\n",
+					"    b4.append(pd.Series(str(df2[\"ISTtime\"][:1])).str.split(\" \")[0][3])\r\n",
+					"    b4.append(DC_Capacity_list[3]) \r\n",
+					"    b4.append(np.mean(final_max_list))\r\n",
+					"    b4.append(df2[df2[\"itemname\"]==\"MCR..B4_MCR_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\"][\"value\"].max())\r\n",
+					"    b4.append(df2[df2[\"itemname\"]==\"ICR17..WMS.AMBIENT_TEMP\"][\"value\"].mean()) \r\n",
+					"    b4.append(np.mean(final_avg_Tm4_list)) \r\n",
+					"    b4.append(df2[df2[\"itemname\"]==\"ICR1..WMS.RELATIVE_HUMDITY\"][\"value\"].mean()) \r\n",
+					"    InvEnergy=0\r\n",
+					"    for i in b4_inv_list:\r\n",
+					"        InvEnergy+=df2[df2[\"itemname\"]==i][\"value\"].max()\r\n",
+					"    b4.append(InvEnergy/1000)\r\n",
+					"    b4.append(df2[df2[\"itemname\"]==\"MCR..B4_TOTAL_INV_DOWN_MINS\"][\"value\"].max())\r\n",
+					"    b4.append(df2[df2[\"itemname\"]==\"MCR..B4_Peak_MW.Active_power\"][\"value\"].max())\r\n",
+					"    b4.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_CO2_REDUCTION\")][\"value\"].max()/5)\r\n",
+					"    b4.append(df2[(df2[\"itemname\"]==\"MCR..B4_EXPORT_ENERGY.Today_Gen\")][\"value\"].max())\r\n",
+					"\r\n",
+					"\r\n",
+					"    b4.append( (df2[(df2[\"itemname\"]==\"MCR..B4_OG1_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()) + (df2[(df2[\"itemname\"]==\"MCR..B4_OG2_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()))\r\n",
+					"    b4.append(df2[(df2[\"itemname\"]==\"MCR..B4_PLT_AV\")][\"value\"].max())\r\n",
+					"    b4.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_GRID_AVAILABILITY\")][\"value\"].max()/5)\r\n",
+					"\r\n",
+					"    b5=[]\r\n",
+					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
+					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"\r\n",
+					"    Tm5_list=[\"ICR6..MT1.MODULE_TEMP_1\",\"ICR6..MT1.MODULE_TEMP_2\",\"ICR7..MT1.MODULE_TEMP_1\",\"ICR7..MT1.MODULE_TEMP_2\",\"ICR7..MT2.MODULE_TEMP_1\",\"ICR7..MT2.MODULE_TEMP_2\",\"ICR9..MT1.MODULE_TEMP\"]\r\n",
+					"    avg_Tm5_list=[]\r\n",
+					"    final_avg_Tm5_list=[]\r\n",
+					"    for i in Tm5_list:\r\n",
+					"        avg_Tm5_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"    max_value_Tm5=max(avg_Tm5_list)\r\n",
+					"    final_reference_value_Tm5=max_value_Tm5-max_value_Tm5*0.02\r\n",
+					"    for i in range(len(avg_Tm5_list)):\r\n",
+					"        if avg_Tm5_list[i]>=final_reference_value_Tm5:\r\n",
+					"            final_avg_Tm5_list.append(avg_Tm5_list[i])\r\n",
+					"            \r\n",
+					"    b5_inv_list=[\"ICR5..INV1.TODAY_GEN\",\"ICR5..INV2.TODAY_GEN\",\"ICR5..INV3.TODAY_GEN\",\"ICR5..INV4.TODAY_GEN\",\"ICR6..INV1.TODAY_GEN\",\"ICR6..INV2.TODAY_GEN\",\"ICR6..INV3.TODAY_GEN\",\"ICR6..INV4.TODAY_GEN\",\"ICR7..INV1.TODAY_GEN\",\"ICR7..INV2.TODAY_GEN\",\"ICR7..INV3.TODAY_GEN\",\"ICR7..INV4.TODAY_GEN\",\r\n",
+					"    \"ICR9..INV1.TODAY_GEN\",\"ICR9..INV2.TODAY_GEN\",\"ICR9..INV3.TODAY_GEN\",\"ICR9..INV4.TODAY_GEN\"]\r\n",
+					"\r\n",
+					"    GII_list=[\"MCR..B5_ICR7_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\",\"MCR..B5_ICR5_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\",\"MCR..B5_ICR9_IRRIDIANCE_KWH.CALCULATED_IRRADIANCE\"]\r\n",
+					"    max_gii_list=[]\r\n",
+					"    final_max_gii_list=[]\r\n",
+					"    for i in GII_list:\r\n",
+					"        max_gii_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"    max_value_gii=max(max_gii_list)\r\n",
+					"    final_reference_value_gii=max_value_gii-max_value_gii*0.02\r\n",
+					"    for i in range(len(max_gii_list)):\r\n",
+					"        if max_gii_list[i]>=final_reference_value_gii:\r\n",
+					"            final_max_gii_list.append(max_gii_list[i])\r\n",
+					"            \r\n",
+					"    b5.append(Block_name_list[4])\r\n",
+					"    b5.append(pd.Series(str(df2[\"ISTtime\"][:1])).str.split(\" \")[0][3])\r\n",
+					"    b5.append(DC_Capacity_list[4])\r\n",
+					"    b5.append(df2[df2[\"itemname\"]==\"MCR..B5_GHI_KWH.CALCULATED_IRRADIANCE\"][\"value\"].max())        \r\n",
+					"    b5.append(np.mean(final_max_gii_list))\r\n",
+					"    b5.append(df2[df2[\"itemname\"]==\"ICR7..WMS.AMBIENT_TEMP\"][\"value\"].mean()) \r\n",
+					"    b5.append(np.mean(final_avg_Tm5_list)) \r\n",
+					"    b5.append(df2[df2[\"itemname\"]==\"ICR7..WMS.RELATIVE_HUMDITY\"][\"value\"].mean()) \r\n",
+					"    InvEnergy=0\r\n",
+					"    for i in b5_inv_list:\r\n",
+					"        InvEnergy+=df2[df2[\"itemname\"]==i][\"value\"].max()\r\n",
+					"    b5.append(InvEnergy/1000)\r\n",
+					"    b5.append(df2[df2[\"itemname\"]==\"MCR..B5_TOTAL_INV_DOWN_MINS\"][\"value\"].max())\r\n",
+					"    b5.append(df2[df2[\"itemname\"]==\"MCR..B5_Peak_MW.Active_power\"][\"value\"].max())\r\n",
+					"    b5.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_CO2_REDUCTION\")][\"value\"].max()/5)\r\n",
+					"    b5.append(df2[(df2[\"itemname\"]==\"MCR..B5_EXPORT_ENERGY.Today_Gen\")][\"value\"].max())\r\n",
+					"\r\n",
+					"\r\n",
+					"    b5.append( (df2[(df2[\"itemname\"]==\"MCR..B5_OG1_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()) + (df2[(df2[\"itemname\"]==\"MCR..B5_OG2_TVM.TOTAL_IMPORT_POWER_MWh\")][\"value\"].max()))\r\n",
+					"    b5.append(df2[(df2[\"itemname\"]==\"MCR..B5_PLT_AV\")][\"value\"].max())\r\n",
+					"    b5.append(df2[(df2[\"itemname\"]==\"MCR..TOTAL_GRID_AVAILABILITY\")][\"value\"].max()/5)\r\n",
+					"\r\n",
+					"    all_block_list=[]\r\n",
+					"    all_block_list.append(b1)\r\n",
+					"    all_block_list.append(b2)\r\n",
+					"    all_block_list.append(b3)\r\n",
+					"    all_block_list.append(b4)\r\n",
+					"    all_block_list.append(b5)\r\n",
+					"    all_block_list\r\n",
+					"\r\n",
+					"    StaticFile = 'abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/PVSystDayCons.xlsx'\r\n",
+					"    daily_df=pd.read_excel(StaticFile,sheet_name=\"StaticData_Table1\")\r\n",
+					"    #daily_df.head()\r\n",
+					"\r\n",
+					"    columns=[\"Block\",\"Date\",\"DC_Capacity\",\"GHI\",\"GII\",\"Tamb\",\"Tm\",\"RH\",\"InvEnergy\",\"Inv_Donwtime\",\"Peak_Power\",\"CO2_Reduction\",\"ExportEnergy\",\"ImportEnergyMeter\",\"PA\",\"GA\"]\r\n",
+					"    df_main1=pd.DataFrame(all_block_list,columns=columns)\r\n",
+					"    df_main1['Date'] = df_main1['Date'].astype('datetime64[ns]')\r\n",
+					"    #df_main1.info()\r\n",
+					"\r\n",
+					"    df_merge=pd.merge(df_main1,daily_df,on=\"Date\",how=\"inner\")\r\n",
+					"    #df_merge.head()\r\n",
+					"\r\n",
+					"    df_merge=df_merge[[\"Block\",\"Date\",\"DC_Capacity\",\"PVSyst_GHI\",\"PVSyst_GII\",\"PVSyst_EGrid\",\"PVSyst_TAmb_Avg\",\"PVSyst_TAmb_WtAvg\",\"PVSyst_TArray_Avg\",\"PVSyst_TArray_WtAvg\",\"GHI\",\"GII\",\"Tamb\",\"Tm\",\"RH\",\"InvEnergy\",\"Inv_Donwtime\",\"Peak_Power\",\"CO2_Reduction\",\"ExportEnergy\",\"ImportEnergyMeter\",\"PA\",\"GA\"]]\r\n",
+					"    #df_merge.head()\r\n",
+					"\r\n",
+					"    df_spark2=spark.createDataFrame(df_merge)\r\n",
+					"\r\n",
+					"    spark.sql(\"create database if not exists reassets\")\r\n",
+					"    df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.antprdayconsolidated\")\r\n",
+					"    location1=\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**USE BELOW BLOCK IF MANUAL OPERATION IS REQUIRED ANYTIME**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

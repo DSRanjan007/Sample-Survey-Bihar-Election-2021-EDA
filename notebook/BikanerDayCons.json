@@ -1,0 +1,2344 @@
+{
+	"name": "BikanerDayCons",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for DayConsolidated at Portfolio level.",
+		"folder": {
+			"name": "Bikaner"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool5",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b9c9d3b2-0ab0-4739-a572-ac4e56161077"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1",
+				"state": {
+					"e1d5cea9-217f-475e-83f1-e8f7086c1c7a": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "Bknr",
+										"1": "2022-10-28 00:00:00",
+										"2": "463.31433",
+										"3": "462.53312999999986",
+										"4": "4.702151",
+										"5": "5.6578740000000005",
+										"6": "2212.1788633000006",
+										"7": "25.44272727272727",
+										"8": "26.385487601880143",
+										"9": "38.26472727272727",
+										"10": "43.411375670437344",
+										"11": "4.85",
+										"12": "5.78",
+										"13": "28.42655036011411",
+										"14": "37.01219584436162",
+										"15": "37.14589583352936",
+										"16": "2135.0431999999987",
+										"17": "319.79",
+										"18": "2118.2999999999997",
+										"19": "3.0600000000000005",
+										"20": "100.0",
+										"21": "100.0"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "Block",
+										"type": "string"
+									},
+									{
+										"key": "1",
+										"name": "Date",
+										"type": "timestamp"
+									},
+									{
+										"key": "2",
+										"name": "PVSyst_DCCapacity",
+										"type": "double"
+									},
+									{
+										"key": "3",
+										"name": "ActualDC_Capacity",
+										"type": "double"
+									},
+									{
+										"key": "4",
+										"name": "PVSyst_GHI",
+										"type": "double"
+									},
+									{
+										"key": "5",
+										"name": "PVSyst_GII",
+										"type": "double"
+									},
+									{
+										"key": "6",
+										"name": "PVSyst_EGrid",
+										"type": "double"
+									},
+									{
+										"key": "7",
+										"name": "PVSyst_TAmb_Avg",
+										"type": "double"
+									},
+									{
+										"key": "8",
+										"name": "PVSyst_TAmb_WtAvg",
+										"type": "double"
+									},
+									{
+										"key": "9",
+										"name": "PVSyst_TArray_Avg",
+										"type": "double"
+									},
+									{
+										"key": "10",
+										"name": "PVSyst_TArray_WtAvg",
+										"type": "double"
+									},
+									{
+										"key": "11",
+										"name": "GHI",
+										"type": "double"
+									},
+									{
+										"key": "12",
+										"name": "GII",
+										"type": "double"
+									},
+									{
+										"key": "13",
+										"name": "Tamb",
+										"type": "double"
+									},
+									{
+										"key": "14",
+										"name": "Tm",
+										"type": "double"
+									},
+									{
+										"key": "15",
+										"name": "RH",
+										"type": "double"
+									},
+									{
+										"key": "16",
+										"name": "InvEnergy",
+										"type": "double"
+									},
+									{
+										"key": "17",
+										"name": "Peak_Power",
+										"type": "double"
+									},
+									{
+										"key": "18",
+										"name": "ExportEnergy",
+										"type": "double"
+									},
+									{
+										"key": "19",
+										"name": "ImportEnergyMeter",
+										"type": "double"
+									},
+									{
+										"key": "20",
+										"name": "PA",
+										"type": "double"
+									},
+									{
+										"key": "21",
+										"name": "GA",
+										"type": "double"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"0"
+									],
+									"seriesFieldKeys": [
+										"2"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool5",
+				"name": "Sparkpool5",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool5",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 32,
+				"memory": 224,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"#import pymsteams\r\n",
+					""
+				],
+				"execution_count": 228
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')"
+				],
+				"execution_count": 229
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadcsv=\"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_opcda/2022/11/08/\"\r\n",
+					"#pattoreadcsv_d = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_d/2022/11/04/\""
+				],
+				"execution_count": 230
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#pattoreadcsv_a = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_a/\"\r\n",
+					"#pattoreadcsv_b = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_b/\"\r\n",
+					"#pattoreadcsv_c = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_c/\"\r\n",
+					"#pattoreadcsv_d = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_d/\"\r\n",
+					"#pattoreadcsv_aa = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4842_a/\"\r\n",
+					"#pattoreadcsv_bb = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4842_b/\"\r\n",
+					"#pattoreadcsv_cc = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4842_c/\"\r\n",
+					"#pattoreadcsv_dd= \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4842_d/\"\r\n",
+					"#2022/10/28/\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 231
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadcsv\r\n",
+					"#location1= location1+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location1)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 232
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#location2 = pattoreadcsv_d\r\n",
+					"#location2= location2+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"#print(location2)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 233
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadcsv_a  \r\n",
+					"location1= location1+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location1)\r\n",
+					"#df = pd.read_parquet(location1)"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location2 = pattoreadcsv_b \r\n",
+					"location2= location2+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location2)\r\n",
+					"#df = pd.read_parquet(location1)"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location3 = pattoreadcsv_c \r\n",
+					"location3= location3+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location3)\r\n",
+					"#df = pd.read_parquet(location1)"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location4 = pattoreadcsv_d \r\n",
+					"location4= location4+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location4)\r\n",
+					"#df = pd.read_parquet(location1)\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location5 = pattoreadcsv_aa\r\n",
+					"location5= location5+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location5)\r\n",
+					"#df = pd.read_parquet(location_a2)\r\n",
+					"\r\n",
+					"location6 = pattoreadcsv_bb \r\n",
+					"location6= location6+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location6)\r\n",
+					"#df = pd.read_parquet(location_b2)\r\n",
+					"location7 = pattoreadcsv_cc \r\n",
+					"location7= location7+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location7)\r\n",
+					"#df = pd.read_parquet(location_c2)\r\n",
+					"\r\n",
+					"location8 = pattoreadcsv_dd \r\n",
+					"location8= location8+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location8)\r\n",
+					"#df = pd.read_parquet(location_d2)\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**USE BELOW BLOCK IF MANUAL OPERATION IS REQUIRED ANYTIME**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_a = spark.read.load(location1, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_a=df2_a.toPandas()\r\n",
+					"df2_a"
+				],
+				"execution_count": 234
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_a['timestamp']=df2_a[\"timestamp\"].apply(lambda x:x.split(\"+\")[0])"
+				],
+				"execution_count": 235
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_a"
+				],
+				"execution_count": 236
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"#df2_b = spark.read.load(location2, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"#df2_b=df2_b.toPandas()\r\n",
+					"#df2_b"
+				],
+				"execution_count": 237
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_c = spark.read.load(location3, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_c=df2_c.toPandas()\r\n",
+					"df2_c"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_d = spark.read.load(location4, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_d=df2_d.toPandas()\r\n",
+					"df2_d"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2_d[(df2_d[\"deviceid\"]=='bikaner_realtime_4841_d') & (df2_d[\"itemname\"]=='ICR1.WMS_PRG.WMS.AIR_TEMPERATURE_DegC')]"
+				],
+				"execution_count": 238
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_aa = spark.read.load(location5, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_aa=df2_aa.toPandas()\r\n",
+					"df2_aa"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_bb = spark.read.load(location6, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_bb=df2_bb.toPandas()\r\n",
+					"df2_bb"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_cc = spark.read.load(location7, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_cc=df2_cc.toPandas()\r\n",
+					"df2_cc"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_dd = spark.read.load(location8, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_dd=df2_dd.toPandas()\r\n",
+					"df2_dd"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=pd.DataFrame()\r\n",
+					"df2=df2.append(df2_a)\r\n",
+					"#df2=df2.append(df2_b)\r\n",
+					"#df2=df2.append(df2_c)\r\n",
+					"#df2=df2.append(df2_d)\r\n",
+					"#df2=df2.append(df2_aa)\r\n",
+					"#df2=df2.append(df2_bb)\r\n",
+					"#df2=df2.append(df2_cc)\r\n",
+					"#df2=df2.append(df2_dd)\r\n",
+					"df2.shape"
+				],
+				"execution_count": 239
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[df2[\"itemname\"]==\"ICR1..INVERTER3_DAILY_GENERATION\"]"
+				],
+				"execution_count": 240
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[df2['value']==0.0]"
+				],
+				"execution_count": 241
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[\"itemname\"].value_counts()"
+				],
+				"execution_count": 242
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2"
+				],
+				"execution_count": 243
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"ICR2.INV2_DATA.INV2_UNIT1.DAILY_YIELD_POWER_kWh"
+				],
+				"execution_count": 244
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[df2[\"itemname\"]==\"ICR2.INV2_DATA.INV2_UNIT1.DAILY_YIELD_POWER_kWh\"]"
+				],
+				"execution_count": 245
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[df2[\"itemname\"]==\"MCR1.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\"]"
+				],
+				"execution_count": 247
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2['sitename'] = 'bikaner'\r\n",
+					"df2.sort_values(by=\"timestamp\",ascending=True,inplace=True)\r\n",
+					"df2.sort_values(by=\"timestamp\",ascending=True,inplace=True)\r\n",
+					"df2=df2[df2[\"sitename\"]==\"bikaner\"]\r\n",
+					"#df2.drop([\"deviceid\",\"quality\",\"ISTtime\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\",\"sitename\"],axis=1,inplace=True)\r\n",
+					"df2.drop([\"deviceid\",\"quality\",\"ISTtime\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\",\"sitename\"],axis=1,inplace=True)\r\n",
+					"\r\n",
+					"df2[\"timestamp\"]=df2[\"timestamp\"].astype(\"datetime64[ns]\")"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[df2['value']<=0]"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[\"Date\"]=pd.DatetimeIndex(df2[\"timestamp\"]).date\r\n",
+					"df2[\"Time\"]=pd.DatetimeIndex(df2[\"timestamp\"]).time\r\n",
+					"df2[\"Hour\"]=pd.DatetimeIndex(df2[\"timestamp\"]).hour\r\n",
+					"df2[\"Minute\"]=pd.DatetimeIndex(df2[\"timestamp\"]).minute\r\n",
+					"df2['value']=df2['value'].astype('float64')\r\n",
+					"df2=df2[(df2[\"Hour\"]>=6) & (df2[\"Hour\"]<=19)]\r\n",
+					"df2.rename(columns = {'timestamp':'ISTtime'}, inplace = True)\r\n",
+					"df2=df2[[\"ISTtime\",\"itemname\",\"value\",\"Date\",\"Time\",\"Hour\",\"Minute\"]]\r\n",
+					"df2.head()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2.tail()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=df2[df2['value']!=0]\r\n",
+					"df2"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df_max=df2.sort_values(['value'],ascending=True)    #To find the max value in the dataframe\r\n",
+					"#df_max.tail(100)"
+				],
+				"execution_count": 48
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def checkIfValuesExists1(dfObj, listOfValues):\r\n",
+					"    ''' Check if given elements exists in dictionary or not.\r\n",
+					"        It returns a dictionary of elements as key and thier existence value as bool'''\r\n",
+					"    resultDict = {}\r\n",
+					"    # Iterate over the list of elements one by one\r\n",
+					"    for elem in listOfValues:\r\n",
+					"        # Check if the element exists in dataframe values\r\n",
+					"        if elem in dfObj.values:\r\n",
+					"            resultDict[elem] = True\r\n",
+					"            \r\n",
+					"            #print(dfObj)\r\n",
+					"        else:\r\n",
+					"            resultDict[elem] = False\r\n",
+					"    # Returns a dictionary of values & thier existence flag        \r\n",
+					"    return resultDict    "
+				],
+				"execution_count": 49
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"result = checkIfValuesExists1(df2,[\"ICR1_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR18_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR23_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR5_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"MCR_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR1_AVG_TILT_IRRADIANCE_kWh\",\t\"ICR1.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\", \"MCR1.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\t\"ICR1.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\"MCR1..PLANT_HT_TVM_ACTIVE_POWER_MWp\",\r\n",
+					"\"ICR18_AVG_TILT_IRRADIANCE_kWh\",\"ICR18.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\"ICR18.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\t\"ICR18.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\t\t\r\n",
+					"\"ICR23_AVG_TILT_IRRADIANCE_kWh\",\"ICR23.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\"ICR1.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\t\"ICR23.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\t\t\r\n",
+					"\"ICR5_AVG_TILT_IRRADIANCE_kWh\",\t\"ICR5.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\"ICR23.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\t\"ICR5.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\t\t\r\n",
+					"\"MCR1_AVG_TILT_IRRADIANCE_kWh\",\t\"MCR1.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\"ICR5.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\t\"MCR1.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\t\r\n",
+					"\"MCR1..B1_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B2_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B3_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B4_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B5_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B6_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B7_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B8_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B9_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B10_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B11_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B12_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B1_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B2_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B3_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B4_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B5_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B6_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B7_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B8_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B9_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B10_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B11_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B12_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1..B1_PLANT_AVAILABILITY\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.COMMON_DATA.PLANT_GRID_CALCI.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\"])\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 50
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"result"
+				],
+				"execution_count": 51
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[df2[\"itemname\"]==\"MCR1..PLANT_HT_TVM_ACTIVE_POWER_MWp\"]"
+				],
+				"execution_count": 52
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"b_inv_list=[\r\n",
+					"\"ICR1..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR1..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR1..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR1..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER4_DAILY_GENERATION\"]"
+				],
+				"execution_count": 53
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"result1 = checkIfValuesExists1(df2,[\r\n",
+					"\"ICR1..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR1..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR1..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR1..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR3.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR2..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR4.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR13.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR8..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR15.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR16..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR17..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR18.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR10..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR9.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR11.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR7..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR12.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR6..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR14.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR5..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR19..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR20.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR21.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR23..INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV1_DATA.INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV2_DATA.INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV3_DATA.INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR22.INV4_DATA.INVERTER4_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER1_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER2_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER3_DAILY_GENERATION\",\r\n",
+					"\"ICR24..INVERTER4_DAILY_GENERATION\"])"
+				],
+				"execution_count": 54
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"result1"
+				],
+				"execution_count": 55
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"b1=[]\r\n",
+					"Block_name=\"Bknr\"\r\n",
+					"DC_Capacity_list=463.31433\r\n",
+					"ghi_list=[\r\n",
+					"\"ICR1_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR18_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR23_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"ICR5_AVG_HORIZONTAL_IRRADIANCE_kWh\",\r\n",
+					"\"MCR_AVG_HORIZONTAL_IRRADIANCE_kWh\"\r\n",
+					"]\r\n",
+					"max_ghi_list=[]\r\n",
+					"final_max_ghi_list=[]\r\n",
+					"for i in ghi_list:\r\n",
+					"    max_ghi_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"max_value_ghi=max(max_ghi_list)\r\n",
+					"final_reference_value_ghi=max_value_ghi-max_value_ghi*0.30           \r\n",
+					"for i in range(len(max_ghi_list)):                               \r\n",
+					"    if max_ghi_list[i]>=final_reference_value_ghi:\r\n",
+					"        final_max_ghi_list.append(max_ghi_list[i])\r\n",
+					"\r\n",
+					"\r\n",
+					"gii_list=[\r\n",
+					"\"ICR1_AVG_TILT_IRRADIANCE_kWh\",\r\n",
+					"\"ICR18_AVG_TILT_IRRADIANCE_kWh\",\r\n",
+					"\"ICR23_AVG_TILT_IRRADIANCE_kWh\",\r\n",
+					"\"ICR5_AVG_TILT_IRRADIANCE_kWh\",\r\n",
+					"\"MCR1_AVG_TILT_IRRADIANCE_kWh\"\r\n",
+					"]\r\n",
+					"max_gii_list=[]\r\n",
+					"final_max_gii_list=[]\r\n",
+					"for i in gii_list:\r\n",
+					"    max_gii_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"max_value_gii=max(max_gii_list)\r\n",
+					"final_reference_value_gii=max_value_gii-max_value_gii*0.20\r\n",
+					"for i in range(len(max_gii_list)):\r\n",
+					"    if max_gii_list[i]>=final_reference_value_gii:\r\n",
+					"        final_max_gii_list.append(max_gii_list[i])\r\n",
+					"\r\n",
+					"\r\n",
+					"Tamb_list=[\r\n",
+					"#\"ICR1.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\r\n",
+					"\"ICR18.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\r\n",
+					"\"ICR23.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\r\n",
+					"\"ICR5.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\",\r\n",
+					"\"MCR1.WMS_PRG.WMS.AIR_TEMPERATURE_DegC\"\r\n",
+					"]\r\n",
+					"avg_Tamb_list=[]\r\n",
+					"final_avg_Tamb_list=[]\r\n",
+					"for i in Tamb_list:\r\n",
+					"    avg_Tamb_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"max_value_Tamb=max(avg_Tamb_list)\r\n",
+					"final_reference_value_Tamb=max_value_Tamb-max_value_Tamb*0.02             \r\n",
+					"for i in range(len(avg_Tamb_list)):                               \r\n",
+					"    if avg_Tamb_list[i]>=final_reference_value_Tamb:\r\n",
+					"        final_avg_Tamb_list.append(avg_Tamb_list[i])\r\n",
+					"\r\n",
+					"\r\n",
+					"Tm1_list=[\r\n",
+					"\"MCR1.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\r\n",
+					"\"ICR18.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\r\n",
+					"\"ICR1.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\r\n",
+					"\"ICR23.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\",\r\n",
+					"\"ICR5.WMS_PRG.WMS.SURFACE_TEMPERATURE1_DegC\"\r\n",
+					"] \r\n",
+					"avg_Tm1_list=[]\r\n",
+					"final_avg_Tm1_list=[]\r\n",
+					"for i in Tm1_list:\r\n",
+					"    avg_Tm1_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"max_value_Tm1=max(avg_Tm1_list)\r\n",
+					"final_reference_value_Tm1=max_value_Tm1-max_value_Tm1*0.02            \r\n",
+					"for i in range(len(avg_Tm1_list)):                               \r\n",
+					"    if avg_Tm1_list[i]>=final_reference_value_Tm1:\r\n",
+					"        final_avg_Tm1_list.append(avg_Tm1_list[i])\r\n",
+					"       \r\n",
+					"         \r\n",
+					"\r\n",
+					"Rh_list=[      \r\n",
+					"\"ICR1.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\r\n",
+					"\"ICR18.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\r\n",
+					"\"ICR23.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\r\n",
+					"\"ICR5.WMS_PRG.WMS.RELATIVE_HUMIDITY\",\r\n",
+					"\"MCR1.WMS_PRG.WMS.RELATIVE_HUMIDITY\"\r\n",
+					"]\r\n",
+					"avg_Rh_list=[]\r\n",
+					"final_avg_Rh_list=[]\r\n",
+					"for i in Rh_list:\r\n",
+					"    avg_Rh_list.append(df2[df2[\"itemname\"]==i][\"value\"].mean())\r\n",
+					"max_value_Rh=max(avg_Rh_list)\r\n",
+					"final_reference_value_Rh=max_value_Rh-max_value_Rh*0.10            \r\n",
+					"for i in range(len(avg_Rh_list)):                               \r\n",
+					"    if avg_Rh_list[i]>=final_reference_value_Rh:\r\n",
+					"        final_avg_Rh_list.append(avg_Rh_list[i])\r\n",
+					"\r\n",
+					"\r\n",
+					"invEnergy=0\r\n",
+					"for i in b_inv_list:\r\n",
+					"    invEnergy+=df2[df2[\"itemname\"]==i][\"value\"].max()\r\n",
+					"\r\n",
+					"#avg_inv_list=[]\r\n",
+					"#final_avg_inv_list=[]\r\n",
+					"#for i in b_inv_list:\r\n",
+					"#    avg_inv_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"#max_value_inv=(sum(avg_inv_list)/len(avg_inv_list))\r\n",
+					"#final_avg_inv_list=max_value_inv/1000\r\n",
+					"\r\n",
+					"#avg_inv_list=[]\r\n",
+					"#final_avg_inv_list=[]\r\n",
+					"#for i in b_inv_list:\r\n",
+					"#    avg_inv_list.append(df2[df2[\"itemname\"]==i][\"value\"].sum())\r\n",
+					"#max_value_inv=(sum(avg_inv_list)/len(avg_inv_list))\r\n",
+					"#final_avg_inv_list=max_value_inv/1000\r\n",
+					"\r\n",
+					"\r\n",
+					"\r\n",
+					"exp_list=[ \"MCR1..B1_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B2_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B3_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B4_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B5_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B6_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B7_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B8_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B9_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B10_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B11_TODAY_EXPORT_MWh\",\r\n",
+					"\"MCR1..B12_TODAY_EXPORT_MWh\"\r\n",
+					"   ]\r\n",
+					"max_exp_list=[]\r\n",
+					"final_max_exp_list=[]\r\n",
+					"for i in exp_list:\r\n",
+					"    max_exp_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"max_value_exp=max(max_exp_list)\r\n",
+					"final_reference_value_exp=max_value_exp-max_value_exp*0.20             \r\n",
+					"for i in range(len(max_exp_list)):                               \r\n",
+					"    if max_exp_list[i]>=final_reference_value_exp:\r\n",
+					"        final_max_exp_list.append(max_exp_list[i]) \r\n",
+					"\r\n",
+					"\r\n",
+					"imp_list=[ \"MCR1..B1_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B2_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B3_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B4_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B5_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B6_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B7_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B8_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B9_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B10_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B11_TODAY_IMPORT_MWh\",\r\n",
+					"\"MCR1..B12_TODAY_IMPORT_MWh\" ]\r\n",
+					"max_imp_list=[]\r\n",
+					"final_max_imp_list=[]\r\n",
+					"for i in imp_list:\r\n",
+					"    max_imp_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"#max_value_imp=max(max_imp_list)\r\n",
+					"#final_reference_value_imp=max_value_imp-max_value_imp*0.80             \r\n",
+					"#for i in range(len(max_imp_list)):                               \r\n",
+					"#    if max_imp_list[i]>=final_reference_value_imp:\r\n",
+					"#        final_max_imp_list.append(max_imp_list[i])\r\n",
+					"\r\n",
+					"\r\n",
+					"pa_list=[ \"MCR1..B1_PLANT_AVAILABILITY\" ]\r\n",
+					"max_pa_list=[]\r\n",
+					"final_max_pa_list=[]\r\n",
+					"for i in pa_list:\r\n",
+					"    max_pa_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"max_value_pa=max(max_pa_list)\r\n",
+					"final_reference_value_pa=max_value_pa-max_value_pa*0.50             \r\n",
+					"for i in range(len(max_pa_list)):                               \r\n",
+					"    if max_pa_list[i]>=final_reference_value_pa:\r\n",
+					"        final_max_pa_list.append(max_pa_list[i])        \r\n",
+					"\r\n",
+					"ga_list=[ \"MCR1.B1_PLANT_CALCI.B1_Grid_Calci.Grid_Availability\",\r\n",
+					"\"MCR1.COMMON_DATA.PLANT_GRID_CALCI.Grid_Availability\",\r\n",
+					" ]\r\n",
+					"max_ga_list=[]\r\n",
+					"final_max_ga_list=[]\r\n",
+					"for i in ga_list:\r\n",
+					"    max_ga_list.append(df2[df2[\"itemname\"]==i][\"value\"].max())\r\n",
+					"max_value_ga=max(max_imp_list)\r\n",
+					"final_reference_value_ga=max_value_ga-max_value_ga*0.50             \r\n",
+					"for i in range(len(max_ga_list)):                               \r\n",
+					"    if max_ga_list[i]>=final_reference_value_ga:\r\n",
+					"        final_max_ga_list.append(max_ga_list[i])\r\n",
+					"\r\n",
+					"\r\n",
+					"b1.append(Block_name)\r\n",
+					"b1.append(pd.Series(str(df2['ISTtime'][:1])).str.split(\" \")[0][3])\r\n",
+					"b1.append(DC_Capacity_list)\r\n",
+					"b1.append(np.mean(final_max_ghi_list))\r\n",
+					"b1.append(np.mean(final_max_gii_list))\r\n",
+					"b1.append(np.mean(final_avg_Tamb_list))\r\n",
+					"b1.append(np.mean(final_avg_Tm1_list))\r\n",
+					"b1.append(np.mean(final_avg_Rh_list))\r\n",
+					"#b1.append(np.sum( final_avg_inv_list))\r\n",
+					"b1.append(np.sum(invEnergy)/1000)\r\n",
+					"b1.append(df2[df2[\"itemname\"]==\"MCR1..PLANT_HT_TVM_ACTIVE_POWER_MWp\"][\"value\"].max())\r\n",
+					"b1.append(np.sum(final_max_exp_list))\r\n",
+					"#b1.append(np.sum(final_max_imp_list))\r\n",
+					"b1.append(np.sum(max_imp_list))\r\n",
+					"#b1.append(final_max_imp_list)\r\n",
+					"b1.append(np.mean(final_max_pa_list))\r\n",
+					"b1.append(np.mean(final_max_ga_list))"
+				],
+				"execution_count": 376
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"b1"
+				],
+				"execution_count": 377
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#max_imp_list"
+				],
+				"execution_count": 378
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"sum(max_imp_list)"
+				],
+				"execution_count": 379
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[df2['itemname']=='MCR1..PLANT_HT_TVM_ACTIVE_POWER_MWp']"
+				],
+				"execution_count": 380
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2[df2['itemname']=='MCR1.COMMON_DATA.PLANT_GRID_CALCI.Grid_Availability']"
+				],
+				"execution_count": 381
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"StaticFile = 'abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/AxonBkn_PVSyst_.xlsx'\r\n",
+					"daily_df=pd.read_excel(StaticFile)\r\n",
+					"daily_df.head()"
+				],
+				"execution_count": 382
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"daily_df.rename(columns={'DCCapacity': 'PVSyst_DCCapacity'},inplace=True)"
+				],
+				"execution_count": 383
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"all_block_list=[]\r\n",
+					"all_block_list.append(b1)"
+				],
+				"execution_count": 384
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"columns=[\"Block\",\"Date\",\"PVSyst_DCCapacity\",\"GHI\",\"GII\",\"Tamb\",\"Tm\",\"RH\",\"InvEnergy\",\"Peak_Power\",\"ExportEnergy\",\"ImportEnergyMeter\",\"PA\",\"GA\"]\r\n",
+					"df_main1=pd.DataFrame(all_block_list,columns=columns)\r\n",
+					"df_main1['Date'] = df_main1['Date'].astype('datetime64[ns]')\r\n",
+					"#df_main1.info()"
+				],
+				"execution_count": 385
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_main1 =df_main1.reindex(columns=['Date','Block','PVSyst_DCCapacity','GHI','GII','Tamb','Tm','RH','InvEnergy','Peak_Power','ExportEnergy','ImportEnergyMeter','PA','GA'])"
+				],
+				"execution_count": 386
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_main1"
+				],
+				"execution_count": 387
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_merge=pd.merge(df_main1,daily_df,on=\"Date\",how=\"inner\")\r\n",
+					"#df_merge.head()"
+				],
+				"execution_count": 388
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df_merge.rename(columns={'Block_x':'_x','DC_Capacity_x': 'PVSyst_DCCapacity'},inplace=True)"
+				],
+				"execution_count": 389
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_merge.rename(columns={'Block_y':'Block','PVSyst_DCCapacity_y': 'PVSyst_DCCapacity'},inplace=True)"
+				],
+				"execution_count": 390
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_merge"
+				],
+				"execution_count": 391
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_merge=df_merge[[\"Block\",\"Date\",\"PVSyst_DCCapacity\",\"ActualDC_Capacity\",\"PVSyst_GHI\",\"PVSyst_GII\",\"PVSyst_EGrid\",\"PVSyst_TAmb_Avg\",\"PVSyst_TAmb_WtAvg\",\"PVSyst_TArray_Avg\",\"PVSyst_TArray_WtAvg\",\"GHI\",\"GII\",\"Tamb\",\"Tm\",\"RH\",\"InvEnergy\",\"Peak_Power\",\"ExportEnergy\",\"ImportEnergyMeter\",\"PA\",\"GA\"]]\r\n",
+					"#df_merge.head()"
+				],
+				"execution_count": 392
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_merge"
+				],
+				"execution_count": 393
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"z=df_merge.melt()"
+				],
+				"execution_count": 394
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"z"
+				],
+				"execution_count": 395
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"x=pd.DataFrame(df_merge)"
+				],
+				"execution_count": 396
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"x.dtypes"
+				],
+				"execution_count": 397
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType,StructField,StringType,DateType,FloatType,LongType,DoubleType"
+				],
+				"execution_count": 398
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"schema=StructType([StructField(\"Block\",StringType()),  #to define schema\r\n",
+					"StructField(\"Date\",TimestampType()),\r\n",
+					"StructField(\"PVSyst_DCCapacity\",DoubleType()),\r\n",
+					"StructField(\"ActualDC_Capacity\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_GHI\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_GII\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_EGrid\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_TAmb_Avg\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_TAmb_WtAvg\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_TArray_Avg\",DoubleType()),\r\n",
+					"StructField(\"PVSyst_TArray_WtAvg\",DoubleType()),\r\n",
+					"StructField(\"GHI\",DoubleType()),\r\n",
+					"StructField(\"GII\",DoubleType()),\r\n",
+					"StructField(\"Tamb\",DoubleType()),\r\n",
+					"StructField(\"Tm\",DoubleType()),\r\n",
+					"StructField(\"RH\",DoubleType()),\r\n",
+					"StructField(\"InvEnergy\",DoubleType()),\r\n",
+					"StructField(\"Peak_Power\",DoubleType()),\r\n",
+					"StructField(\"ExportEnergy\",DoubleType()),\r\n",
+					"StructField(\"ImportEnergyMeter\",DoubleType()),\r\n",
+					"StructField(\"PA\",DoubleType()),\r\n",
+					"StructField(\"GA\",DoubleType()),\r\n",
+					"])"
+				],
+				"execution_count": 404
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark2=spark.createDataFrame(df_merge, schema = schema) "
+				],
+				"execution_count": 405
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark2"
+				],
+				"execution_count": 406
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.conf.set(\"spark.sql.execution.arrow.pyspark.enabled\", \"true\")\r\n",
+					"spark.conf.set(\"spark.sql.execution.arrow.pyspark.fallback.enabled\",\"true\")"
+				],
+				"execution_count": 407
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"create database if not exists reassetsbikaner\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassetsbikaner.bikanerconsolidated\")"
+				],
+				"execution_count": 408
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"select * from reassetsbikaner.bikanerconsolidated  order by date\")  \r\n",
+					"display(df)    "
+				],
+				"execution_count": 409
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.schema"
+				],
+				"execution_count": 410
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df"
+				],
+				"execution_count": 411
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1=df.toPandas()\r\n",
+					"\r\n",
+					"df1[\"Date\"]=df1[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"#df1.info()\r\n",
+					"\r\n",
+					"df1[\"Year\"]=pd.DatetimeIndex(df1[\"Date\"]).year\r\n",
+					"#df1.head()\r\n",
+					"\r\n",
+					"df1[\"Month\"]=pd.DatetimeIndex(df1[\"Date\"]).month\r\n",
+					"\r\n",
+					"df1[\"PVSyst_Egrid_MTD\"]=df1.groupby(by=[\"Block\",\"Year\",\"Month\"])[\"PVSyst_EGrid\"].cumsum()\r\n",
+					"df1[\"PVSyst_GII_MTD\"]=df1.groupby(by=[\"Block\",\"Year\",\"Month\"])[\"PVSyst_GII\"].cumsum()\r\n",
+					"df1[\"GII_MTD\"]=df1.groupby(by=[\"Block\",\"Year\",\"Month\"])[\"GII\"].cumsum()\r\n",
+					"\r\n",
+					"df1[\"PVSyst_PR\"]=(df1[\"PVSyst_EGrid\"]/df1[\"PVSyst_DCCapacity\"])/df1[\"PVSyst_GII\"]\r\n",
+					"\r\n",
+					"df1[\"Ins.Delta\"]=(df1[\"GII\"]-df1[\"PVSyst_GII\"])/df1[\"PVSyst_GII\"]\r\n",
+					"\r\n",
+					"df1[\"YesterdayImportEnergyMeter\"]=df1.sort_values(by=['Block','Date'],ascending=True).groupby(by=[\"Block\"])[\"ImportEnergyMeter\"].shift(1)\r\n",
+					"df1[\"ImportEnergy\"]=(df1[\"ImportEnergyMeter\"]-df1[\"YesterdayImportEnergyMeter\"])*360\r\n",
+					"#df1.sort_values(by=['Block','Date'],ascending=True)\r\n",
+					"\r\n",
+					"\r\n",
+					"df1[\"NetEnergy\"]=df1[\"ExportEnergy\"]-df1[\"ImportEnergy\"]\r\n",
+					"\r\n",
+					"df1[\"AC_Loss\"]=(df1[\"InvEnergy\"]-df1[\"NetEnergy\"])/df1[\"InvEnergy\"]\r\n",
+					"\r\n",
+					"df1[\"NetEnergy_MTD\"]=df1.groupby(by=[\"Block\",\"Year\",\"Month\"])[\"NetEnergy\"].cumsum()\r\n",
+					"\r\n",
+					"df1[\"ExpectedEnergy\"]=(df1[\"PVSyst_DCCapacity\"]*df1[\"GII\"]*df1[\"PVSyst_PR\"]*df1[\"GA\"])/100\r\n",
+					"df1[\"ExpectedEnergy_MTD\"]=df1.groupby(by=[\"Block\",\"Year\",\"Month\"])[\"ExpectedEnergy\"].cumsum()\r\n",
+					"\r\n",
+					"df1[\"EPI\"]=df1[\"NetEnergy\"]/df1[\"ExpectedEnergy\"]\r\n",
+					"\r\n",
+					"df1[\"SPPr\"]=(df1[\"NetEnergy\"]/df1[\"PVSyst_EGrid\"])*100\r\n",
+					"\r\n",
+					"df1[\"PR\"]=(((df1[\"NetEnergy\"]/df1[\"PVSyst_DCCapacity\"])/df1[\"GII\"])/df1[\"GA\"])*10000\r\n",
+					"\r\n",
+					"df1[\"CUF_DC\"]=(((df1[\"NetEnergy\"]/df1[\"PVSyst_DCCapacity\"])/24))*100\r\n",
+					"\r\n",
+					"df1[\"CUF_AC\"]=(df1[\"NetEnergy\"]/50/24)*100\r\n",
+					"\r\n",
+					"df1[\"Rvnu\"]=df1[\"NetEnergy\"]*2.73/1000\r\n",
+					"\r\n",
+					"df1[\"Rvnu_MTD\"]=df1.groupby(by=[\"Block\",\"Year\",\"Month\"])[\"Rvnu\"].cumsum()\r\n",
+					"\r\n",
+					"df_spark2=spark.createDataFrame(df1)\r\n",
+					"\r\n",
+					"#spark.sql(\"create database if not exists Table1_1\")\r\n",
+					"#df_spark2.write.mode(\"overwrite\").saveAsTable(\"Table1_1.table1_2\")"
+				],
+				"execution_count": 413
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1.to_excel(\"abfss://repono@ayanadatalake.dfs.core.windows.net/BikanerDayCons/DayConsolidatedALL.xlsx\")"
+				],
+				"execution_count": 414
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=df1\r\n",
+					"df2"
+				],
+				"execution_count": 415
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dff=df2.melt()\r\n",
+					"dff.head()"
+				],
+				"execution_count": 416
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=df1.tail() #to get the recent one\r\n",
+					"((df2[\"GII\"].sum()-df2[\"PVSyst_GII\"].sum())/df2[\"PVSyst_GII\"].sum())*100"
+				],
+				"execution_count": 417
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"x=\"Bikaner\"+\"\\r\\n\\r\\n\"+\"Today | \"+str(df2.iloc[0,1]).split(\" \")[0]+\"  |  \"+\"Inso.Delta: \"+str(np.round(((df2[\"GII\"].sum()-df2[\"PVSyst_GII\"].sum())/df2[\"PVSyst_GII\"].sum())*100,2))+\"%\"+\"\\n\\n\"+\"BGT: \"+str(np.round(df2[\"PVSyst_EGrid\"].sum(),2))+\"\\r\\n\\r\\n\"+\"EXP: \"+str(np.round(df2[\"ExpectedEnergy\"].sum(),2))+\"\\r\\n\\r\\n\"+\"ACT: \"+str(np.round(df2[\"NetEnergy\"].sum(),2))+\"\\n\\n\"+\"........................\"+\"\\n\\n\"+\"MTD\"+\"  |  \"+\"Inso.Delta: \"+str(np.round(((df2[\"GII_MTD\"].sum()-df2[\"PVSyst_GII_MTD\"].sum())/df2[\"PVSyst_GII_MTD\"].sum())*100,2))+\"%\" + \"\\r\\n\\r\\n\"+\"BGT: \"+str(np.round(df2[\"PVSyst_Egrid_MTD\"].sum(),2))+\"\\r\\n\\r\\n\"+\"EXP: \"+str(np.round(df2[\"ExpectedEnergy_MTD\"].sum(),2))+\"\\r\\n\\r\\n\"+\"ACT: \"+str(np.round(df2[\"NetEnergy_MTD\"].sum(),2))\r\n",
+					"x\r\n",
+					"import pymsteams  #to send notification message\r\n",
+					"#myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/c5319b3c-6028-485d-b781-f8e7d0ade630@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/bb38e1ab8e0e4d9488206d3d99bd58c6/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"myTeamsMessage.text(x)\r\n",
+					"myTeamsMessage.send()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df1=df1.toPandas()\r\n",
+					"df2=df1.tail()\r\n",
+					"df2_Bknr=df2[df2[\"Block\"]==\"Bknr\"]\r\n",
+					"ml1=list(df2_Bknr.values[0])   \r\n",
+					"ml2=list(df2.columns)\r\n",
+					"msg1=dict(zip(ml2,ml1))\r\n",
+					"msg1\r\n",
+					"\r\n",
+					"x=\"Date: \"+str(msg1[\"Date\"]).split(\" \")[0]+\"\\n\\n\"+\"Block: \"+str(msg1[\"Block\"])+\" | \"+str(np.round(msg1[\"DC_Capacity\"],2))+\"\\n\\n\"+\"PR: \"+str(np.round(msg1[\"PR\"],2))+\"%\"+\"\\n\\n\"+\"CUF_AC: \"+str(np.round(msg1[\"CUF_AC\"],2))+\"\\n\\n\"+\"CUF_DC: \"+str(np.round(msg1[\"CUF_DC\"],2))+\"\\n\\n\"+\"GII: \"+str(np.round(msg1[\"GII\"],2))+\"\\n\\n\"+\"Ins.Delta: \"+str(np.round(msg1[\"Ins.Delta\"],3)*100)+\"%\"+\"\\n\\n\"+\"InvEnergy: \"+str(np.round(msg1[\"InvEnergy\"],2))+\" MWh\"+\"\\n\\n\"+\"Expected Energy: \"+str(np.round(msg1[\"ExpectedEnergy\"],2))+\" MWh\"+\"\\n\\n\"+\"Budgeted: \"+str(np.round(msg1[\"PVSyst_EGrid\"],2))+\" MWh\"+\"\\n\\n\"+\"NetEnergy: \"+str(np.round(msg1[\"NetEnergy\"],2))+\" MWh\"+\"\\n\\n\"+\"PA: \"+str(np.round(msg1[\"PA\"],2))+\"%\"+\"\\n\\n\"+\"GA: \"+str(np.round(msg1[\"GA\"],2))+\"%\"+\"\\n\\n\"+\"Rvnu: \"+str(np.round(msg1[\"Rvnu\"],2))+\" M\"+\"\\n\\n\"+\"Rvnu_MTD: \"+str(np.round(msg1[\"Rvnu_MTD\"],2))+\" M\"\r\n",
+					"x\r\n",
+					"\r\n",
+					"import pymsteams\r\n",
+					"#myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/c5319b3c-6028-485d-b781-f8e7d0ade630@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/700fcf1fff1f4514a95cd9687695a34d/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"myTeamsMessage.text(x)\r\n",
+					"myTeamsMessage.send()"
+				]
+			}
+		]
+	}
+}

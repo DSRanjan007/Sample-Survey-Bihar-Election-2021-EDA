@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 4",
+	"properties": {
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/phelanrealtime/phelan_realtime/2022/04/08/-1493444302_94d639ea0b034dec8b9bc2cc7d7c6654_1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

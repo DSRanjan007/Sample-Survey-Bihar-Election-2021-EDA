@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 8",
+	"properties": {
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/bikanerrealtime/bikaner_realtime_opcda/2022/11/08/-1493444302_4215695fec2c4f31bd2dcc34a914c648_1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

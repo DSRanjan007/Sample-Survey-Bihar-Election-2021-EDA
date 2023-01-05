@@ -1,0 +1,1889 @@
+{
+	"name": "invertertable_Copy1",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for Inverters' Performance.",
+		"folder": {
+			"name": "phelan"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool2",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b3d89d8b-2f68-4160-aa15-e84a858f9f7f"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool2",
+				"name": "Sparkpool2",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool2",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**INVERTER TABLE WITH VARIOUS DAY-LEVEL FEATURES LIKE: Energy, SpY, Donwtime, Wake-UpTime, SleepTime, EnergyLost, Efficiency**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"#import pymsteams"
+				],
+				"execution_count": 192
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadcsv = \"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 193
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadcsv   \r\n",
+					"location1= location1+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location1)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 194
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"#df = spark.read.load(location1, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df=df.toPandas()\r\n",
+					"df"
+				],
+				"execution_count": 195
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.shape"
+				],
+				"execution_count": 196
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df[df[\"itemname\"]==\"ITC1_INV1_TODAY_KWH\"]"
+				],
+				"execution_count": 197
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location_input=\"abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/\"\r\n",
+					""
+				],
+				"execution_count": 198
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"174560+174304+175521+110583"
+				],
+				"execution_count": 199
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"df.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"#df=df[df[\"sitename\"]==\"ananthpuram\"]\r\n",
+					"df.drop([\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],axis=1,inplace=True)\r\n",
+					"df[\"ISTtime\"]=df[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"df[\"Date\"]=pd.DatetimeIndex(df[\"ISTtime\"]).date\r\n",
+					"df[\"Time\"]=pd.DatetimeIndex(df[\"ISTtime\"]).time\r\n",
+					"df[\"Hour\"]=pd.DatetimeIndex(df[\"ISTtime\"]).hour\r\n",
+					"df[\"Minute\"]=pd.DatetimeIndex(df[\"ISTtime\"]).minute\r\n",
+					"df=df[(df[\"Hour\"]>=6) & (df[\"Hour\"]<=19)]\r\n",
+					"df=df.drop_duplicates()\r\n",
+					"df[\"value\"]=df[\"value\"].astype(\"float32\")\r\n",
+					"df1=df.copy()\r\n",
+					"df2=df.copy()"
+				],
+				"execution_count": 200
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df[\"SPP\"]=\"Phelan\"\r\n",
+					"df=df[df['itemname'].str.startswith('ITC', na=True)]\r\n",
+					"df=df[df['itemname'].str.contains('TODAY_KWH', na=True)]\r\n",
+					"df = df[~df[\"itemname\"].str.contains('MFM_', na=True)]\r\n",
+					"df = df[~df[\"itemname\"].str.contains('MOD', na=True)]\r\n",
+					"len(df[\"itemname\"].unique())"
+				],
+				"execution_count": 201
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.to_excel(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/Energy.xlsx\")"
+				],
+				"execution_count": 202
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df"
+				],
+				"execution_count": 203
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df[\"ICR\"]=df[\"itemname\"].apply(lambda x:x.split(\"_\")[0])\r\n",
+					"df[\"INV\"]=df[\"itemname\"].apply(lambda x:x.split(\"_\")[1].split('_')[0])"
+				],
+				"execution_count": 204
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df"
+				],
+				"execution_count": 205
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df[\"Block\"]=\"Phelan1\""
+				],
+				"execution_count": 206
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df[\"ICR\"].unique()"
+				],
+				"execution_count": 207
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df[\"Inverter_OEM\"]=\"SG3125HV-20\"\r\n",
+					"\r\n",
+					"ICR_dict={\"ITC1\":\"ICR01\",\r\n",
+					"         \"ITC2\":\"ICR02\",\r\n",
+					"         \"ITC3\":\"ICR03\",\r\n",
+					"         \"ITC4\":\"ICR04\"}\r\n",
+					"df[\"ICR\"].replace(ICR_dict,inplace=True)\r\n",
+					"\r\n",
+					"df[\"Inv\"]=df[\"ICR\"].str[0]+df[\"ICR\"].str[-2:]+\"_\"+df[\"INV\"].str[-1]\r\n",
+					"\r\n",
+					"dfc=df.groupby(by=[\"Inv\",\"Hour\"]).agg(\"max\").reset_index()"
+				],
+				"execution_count": 208
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfc"
+				],
+				"execution_count": 209
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfc_final=dfc.copy()\r\n",
+					"dfc_final=dfc_final[[\"Date\",\"Hour\",\"Minute\",\"itemname\",\"Inv\",\"value\"]]\r\n",
+					"dfc_final[\"value\"]=dfc_final[\"value\"].astype(\"float32\")"
+				],
+				"execution_count": 210
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfc1=dfc_final.groupby(by=[\"Inv\"]).agg(\"max\").reset_index()"
+				],
+				"execution_count": 211
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfc1"
+				],
+				"execution_count": 212
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Radiation_Block1=df2[df2['itemname']==\"WMS_GII\"]\r\n",
+					"Radiation_Block1=Radiation_Block1[[\"ISTtime\",\"itemname\",\"value\"]]\r\n",
+					"Radiation_Block1[\"ISTtime\"]=Radiation_Block1[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"Radiation_Block1[\"Hour\"]=pd.DatetimeIndex(Radiation_Block1[\"ISTtime\"]).hour\r\n",
+					"Radiation_Block1[\"Minute\"]=pd.DatetimeIndex(Radiation_Block1[\"ISTtime\"]).minute\r\n",
+					"\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 213
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Radiation_Block1"
+				],
+				"execution_count": 214
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2"
+				],
+				"execution_count": 215
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=df2[df2['itemname'].str.startswith('ITC', na=True)]\r\n",
+					"#df1=df1[df1['itemname'].str.startswith('ITC', na=True)]\r\n",
+					"#df1=df1[df1['itemname'].str.contains('EFFICIENCY', na=True)]\r\n",
+					"\r\n",
+					"df2=df2[df2['itemname'].str.contains('KW', na=True)]\r\n",
+					"df2 = df2[df2[\"itemname\"].str.endswith('KW', na=True)]\r\n",
+					"df2 = df2[~df2[\"itemname\"].str.contains('MFM', na=True)]\r\n",
+					"df2 = df2[~df2[\"itemname\"].str.contains('DC', na=True)]\r\n",
+					"df2 = df2[~df2[\"itemname\"].str.contains('MOD', na=True)]\r\n",
+					"df2"
+				],
+				"execution_count": 216
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[\"Hour\"].value_counts()"
+				],
+				"execution_count": 217
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2.to_excel(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/AC.xlsx\")"
+				],
+				"execution_count": 218
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1=df1[df1['itemname'].str.startswith('ITC', na=True)]\r\n",
+					"#df1=df1[df1['itemname'].str.startswith('ITC', na=True)]\r\n",
+					"#df1=df1[df1['itemname'].str.contains('EFFICIENCY', na=True)]\r\n",
+					"\r\n",
+					"df1=df1[df1['itemname'].str.contains('KW', na=True)]\r\n",
+					"df1 = df1[df1[\"itemname\"].str.endswith('KW', na=True)]\r\n",
+					"df1 = df1[~df1[\"itemname\"].str.contains('MFM', na=True)]\r\n",
+					"df1 = df1[df1[\"itemname\"].str.contains('DC', na=True)]\r\n",
+					"df1 = df1[~df1[\"itemname\"].str.contains('MOD', na=True)]\r\n",
+					"df1"
+				],
+				"execution_count": 219
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1[\"itemname_1\"]=df1[\"itemname\"].str.split(\"_\").str[0]+\"_\"+df1[\"itemname\"].str.split(\"_\").str[1]"
+				],
+				"execution_count": 220
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[\"value\"].value_counts()"
+				],
+				"execution_count": 221
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[\"itemname_1\"]=df2[\"itemname\"].str.split(\"_\").str[0]+\"_\"+df2[\"itemname\"].str.split(\"_\").str[1]"
+				],
+				"execution_count": 222
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2"
+				],
+				"execution_count": 223
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1"
+				],
+				"execution_count": 224
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1=pd.merge(df2,df1,how=\"inner\",left_on=[\"itemname_1\",\"Hour\",\"Minute\"],right_on=[\"itemname_1\",\"Hour\",\"Minute\"])\r\n",
+					"df1=df1[[\"ISTtime_x\",\"itemname_1\",\"value_x\",\"value_y\",\"Date_y\",\"Hour\",\"Minute\",\"Time_x\"]]\r\n",
+					"df1[\"itemname\"]=df1[\"itemname_1\"]+\"_\"+\"EFFICIENCY\""
+				],
+				"execution_count": 225
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1"
+				],
+				"execution_count": 226
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1[\"value_x\"]=df1[\"value_x\"].astype(\"float32\")\r\n",
+					"df1[\"value_y\"]=df1[\"value_y\"].astype(\"float32\")\r\n",
+					"df1[\"value\"]=df1[\"value_x\"]/df1[\"value_y\"]\r\n",
+					"df1=df1[[\"ISTtime_x\",\"itemname\",\"value\",\"Date_y\",\"Time_x\",\"Hour\",\"Minute\"]]"
+				],
+				"execution_count": 227
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1.rename({\"ISTtime_x\":\"ISTtime\",\r\n",
+					"\"Date_y\":\"Date\",\r\n",
+					"\"Time_x\":\"Time\",},inplace=True)"
+				],
+				"execution_count": 228
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1"
+				],
+				"execution_count": 229
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2"
+				],
+				"execution_count": 230
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=df2.iloc[:,0:7]\r\n",
+					"df2"
+				],
+				"execution_count": 231
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Block1_list=[\r\n",
+					"\"ITC1_INV1_KW\",\r\n",
+					"\"ITC1_INV2_KW\",\r\n",
+					"\"ITC1_INV3_KW\",\r\n",
+					"\"ITC1_INV4_KW\",\r\n",
+					"\"ITC2_INV1_KW\",\r\n",
+					"\"ITC2_INV2_KW\",\r\n",
+					"\"ITC2_INV3_KW\",\r\n",
+					"\"ITC2_INV4_KW\",\r\n",
+					"\"ITC3_INV1_KW\",\r\n",
+					"\"ITC3_INV2_KW\",\r\n",
+					"\"ITC3_INV3_KW\",\r\n",
+					"\"ITC3_INV4_KW\",\r\n",
+					"\"ITC4_INV1_KW\",\r\n",
+					"\"ITC4_INV2_KW\",\r\n",
+					"\"ITC4_INV3_KW\",\r\n",
+					"\"ITC4_INV4_KW\"]"
+				],
+				"execution_count": 232
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"print(len(Block1_list))"
+				],
+				"execution_count": 233
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import datetime"
+				],
+				"execution_count": 234
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data_frame_list_final=[]\r\n",
+					"data_frame_inverter_downtime_list_final=[]"
+				],
+				"execution_count": 235
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Radiation_Block1"
+				],
+				"execution_count": 236
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2"
+				],
+				"execution_count": 237
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1[\"value\"].value_counts()"
+				],
+				"execution_count": 238
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1=df1[df1[\"value\"]!='inf']\r\n",
+					"df1"
+				],
+				"execution_count": 239
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1.iloc[2202,:]"
+				],
+				"execution_count": 240
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_each_tag_inv_efficiency_average=df1[(df1[\"itemname\"]==\"ITC3_INV2_KW\".split(\"_\")[0]+\"_\"+\"ITC3_INV2_KW\".split(\"_\")[1]+\"_EFFICIENCY\") & (df1[\"value\"]!=0)][\"value\"].mean()\r\n",
+					"df_each_tag_inv_efficiency_max=df1[(df1[\"itemname\"]==\"ITC3_INV2_KW\".split(\"_\")[0]+\"_\"+\"ITC3_INV2_KW\".split(\"_\")[1]+\"_EFFICIENCY\") & (df1[\"value\"]!=0)][\"value\"].max()"
+				],
+				"execution_count": 241
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1.info()"
+				],
+				"execution_count": 242
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1.replace([np.inf, -np.inf], np.nan, inplace=True)\r\n",
+					"  \r\n",
+					"# Dropping all the rows with nan values\r\n",
+					"df1.dropna(inplace=True)\r\n",
+					"  \r\n",
+					"# Printing df\r\n",
+					"df1"
+				],
+				"execution_count": 243
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1.dropna(subset=[\"value\"],inplace=True)"
+				],
+				"execution_count": 244
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data_frame_list=[]\r\n",
+					"data_frame_inverter_downtime_list=[]\r\n",
+					"for i in Block1_list:\r\n",
+					"    each_tag_list=[]\r\n",
+					"    each_tag_list.append(i)\r\n",
+					"    df_each_tag=df2[df2[\"itemname\"]==i]\r\n",
+					"    df_each_tag_with_radiation=pd.merge(df_each_tag,Radiation_Block1,how=\"inner\",left_on=[\"Hour\",\"Minute\"],right_on=[\"Hour\",\"Minute\"])\r\n",
+					"    df_each_tag_with_radiation=df_each_tag_with_radiation.drop_duplicates(subset=[\"Hour\",\"Minute\"]).reset_index(drop=True)\r\n",
+					"    df_each_tag_with_radiation=df_each_tag_with_radiation[[\"ISTtime_x\",\"itemname_x\",\"value_x\",\"value_y\"]]\r\n",
+					"    df_each_tag_with_radiation_pattern=df_each_tag_with_radiation[(df_each_tag_with_radiation[\"value_x\"]==0) & (df_each_tag_with_radiation[\"value_y\"]!=0)].reset_index(drop=True)\r\n",
+					"    up_time=str(df_each_tag_with_radiation[df_each_tag_with_radiation[\"value_x\"]!=0][\"ISTtime_x\"].head(1)).split(\" \")[4].split(\"\\n\")[0]\r\n",
+					"    sleep_time=str(df_each_tag_with_radiation[df_each_tag_with_radiation[\"value_x\"]!=0][\"ISTtime_x\"].tail(1)).split(\" \")[4].split(\"\\n\")[0]\r\n",
+					"    up_time_hour=up_time.split(\":\")[0]\r\n",
+					"    up_time_minute=up_time.split(\":\")[1]\r\n",
+					"    up_time_second=up_time.split(\":\")[2].split(\".\")[0]\r\n",
+					"    #up_time_millisecond=up_time.split(\":\")[2].split(\".\")[1]\r\n",
+					"    sleep_time_hour=sleep_time.split(\":\")[0]\r\n",
+					"    sleep_time_minute=sleep_time.split(\":\")[1]\r\n",
+					"    sleep_time_second=sleep_time.split(\":\")[2].split(\".\")[0]\r\n",
+					"    #sleep_time_millisecond=sleep_time.split(\":\")[2].split(\".\")[1]\r\n",
+					"    a1=datetime.timedelta(hours=int(up_time_hour), minutes=int(up_time_minute), seconds=int(up_time_second)) \r\n",
+					"    b1=datetime.timedelta(hours=int(sleep_time_hour), minutes=int(sleep_time_minute), seconds=int(sleep_time_second))\r\n",
+					"    op_minute=(b1-a1).seconds/60\r\n",
+					"    df_each_tag_inv_efficiency_average=df1[(df1[\"itemname\"]==i.split(\"_\")[0]+\"_\"+i.split(\"_\")[1]+\"_EFFICIENCY\") & (df1[\"value\"]!=0)][\"value\"].mean()\r\n",
+					"    df_each_tag_inv_efficiency_max=df1[(df1[\"itemname\"]==i.split(\"_\")[0]+\"_\"+i.split(\"_\")[1]+\"_EFFICIENCY\") & (df1[\"value\"]!=0)][\"value\"].max()\r\n",
+					"    \r\n",
+					"    #print(up_time,sleep_time)\r\n",
+					"    downtime=0\r\n",
+					"    energy_loss=0\r\n",
+					"    if len(df_each_tag_with_radiation_pattern)==0:\r\n",
+					"        each_tag_list.append(np.round(downtime,2))\r\n",
+					"        each_tag_list.append(up_time)\r\n",
+					"        each_tag_list.append(sleep_time)\r\n",
+					"        each_tag_list.append(op_minute)\r\n",
+					"        each_tag_list.append(op_minute-np.round(downtime,2))\r\n",
+					"        each_tag_list.append(np.round(df_each_tag_inv_efficiency_average,4))\r\n",
+					"        each_tag_list.append(np.round(df_each_tag_inv_efficiency_max,4))\r\n",
+					"        each_tag_list.append(np.round((energy_loss/60000)*df_each_tag_inv_efficiency_max*downtime,2))\r\n",
+					"        data_frame_list.append(each_tag_list) \r\n",
+					"    else:\r\n",
+					"        print(df_each_tag_with_radiation_pattern)\r\n",
+					"        energy_loss=list(df_each_tag_with_radiation_pattern[\"value_y\"])\r\n",
+					"        energy_loss=[i if i<890 else 890 for i in energy_loss]\r\n",
+					"        energy_loss=np.sum(energy_loss)\r\n",
+					"        index_list=[-1]\r\n",
+					"        for i in range(0,len(df_each_tag_with_radiation_pattern)):\r\n",
+					"            if i<=len(df_each_tag_with_radiation_pattern)-2:\r\n",
+					"                #print(\"i=\",i)\r\n",
+					"                hour_i=int(str(df_each_tag_with_radiation_pattern.iloc[i,0]).split(' ')[1].split(\":\")[0])\r\n",
+					"                minute_i=int(str(df_each_tag_with_radiation_pattern.iloc[i,0]).split(' ')[1].split(\":\")[1])\r\n",
+					"                second_i=int(str(df_each_tag_with_radiation_pattern.iloc[i,0]).split(' ')[1].split(\":\")[2].split(\".\")[0])\r\n",
+					"                #millisecond_i=int(str(df_each_tag_with_radiation_pattern.iloc[i,0]).split(' ')[1].split(\":\")[2].split(\".\")[1])\r\n",
+					"                hour_ii=int(str(df_each_tag_with_radiation_pattern.iloc[i+1,0]).split(' ')[1].split(\":\")[0])\r\n",
+					"                minute_ii=int(str(df_each_tag_with_radiation_pattern.iloc[i+1,0]).split(' ')[1].split(\":\")[1])\r\n",
+					"                second_ii=int(str(df_each_tag_with_radiation_pattern.iloc[i+1,0]).split(' ')[1].split(\":\")[2].split(\".\")[0])\r\n",
+					"                #millisecond_ii=int(str(df_each_tag_with_radiation_pattern.iloc[i+1,0]).split(' ')[1].split(\":\")[2].split(\".\")[1])\r\n",
+					"                a=datetime.timedelta(hours=int(hour_i), minutes=int(minute_i), seconds=int(second_i)) \r\n",
+					"                b=datetime.timedelta(hours=int(hour_ii), minutes=int(minute_ii), seconds=int(second_ii))\r\n",
+					"                minute=(b-a).seconds/60\r\n",
+					"                #print(minute)\r\n",
+					"                if minute>3:\r\n",
+					"                    index_list.append(i)\r\n",
+					"            else:\r\n",
+					"                break\r\n",
+					"        index_list.append(len(df_each_tag_with_radiation_pattern)-1)\r\n",
+					"        downtime=0\r\n",
+					"        print(index_list)\r\n",
+					"        for i in range(len(index_list)):\r\n",
+					"            if i<=(len(index_list)-2):\r\n",
+					"                ml2=[]\r\n",
+					"                ml2.append(str(df_each_tag_with_radiation_pattern.iloc[0,0]).split(' ')[0])\r\n",
+					"                ml2.append(df_each_tag_with_radiation_pattern.iloc[0,1])\r\n",
+					"                ml2.append(str(df_each_tag_with_radiation_pattern.iloc[index_list[i]+1,0]).split(' ')[1])\r\n",
+					"                ml2.append(str(df_each_tag_with_radiation_pattern.iloc[index_list[i+1],0]).split(' ')[1])\r\n",
+					"\r\n",
+					"                hour_i=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i]+1,0]).split(' ')[1].split(\":\")[0])\r\n",
+					"                minute_i=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i]+1,0]).split(' ')[1].split(\":\")[1])\r\n",
+					"                second_i=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i]+1,0]).split(' ')[1].split(\":\")[2].split(\".\")[0])\r\n",
+					"                #millisecond_i=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i]+1,0]).split(' ')[1].split(\":\")[2].split(\".\")[1])\r\n",
+					"                hour_ii=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i+1],0]).split(' ')[1].split(\":\")[0])\r\n",
+					"                minute_ii=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i+1],0]).split(' ')[1].split(\":\")[1])\r\n",
+					"                second_ii=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i+1],0]).split(' ')[1].split(\":\")[2].split(\".\")[0])\r\n",
+					"                #millisecond_ii=int(str(df_each_tag_with_radiation_pattern.iloc[index_list[i+1],0]).split(' ')[1].split(\":\")[2].split(\".\")[1])\r\n",
+					"                a=datetime.timedelta(hours=int(hour_i), minutes=int(minute_i), seconds=int(second_i)) \r\n",
+					"                b=datetime.timedelta(hours=int(hour_ii), minutes=int(minute_ii), seconds=int(second_ii))\r\n",
+					"                #print(hour_i,minute_i,second_i,hour_ii,minute_ii,second_ii)\r\n",
+					"                minute=(b-a).seconds/60\r\n",
+					"                downtime=downtime+minute\r\n",
+					"                ml2.append(minute)\r\n",
+					"                data_frame_inverter_downtime_list.extend([ml2])\r\n",
+					"        each_tag_list.append(np.round(downtime,2))\r\n",
+					"        each_tag_list.append(up_time)\r\n",
+					"        each_tag_list.append(sleep_time)\r\n",
+					"        each_tag_list.append(op_minute)\r\n",
+					"        each_tag_list.append(op_minute-np.round(downtime,2))\r\n",
+					"        each_tag_list.append(np.round(df_each_tag_inv_efficiency_average,4))\r\n",
+					"        each_tag_list.append(np.round(df_each_tag_inv_efficiency_max,4))\r\n",
+					"        each_tag_list.append(np.round((energy_loss/60000)*df_each_tag_inv_efficiency_max*downtime,2))\r\n",
+					"        data_frame_list.append(each_tag_list)\r\n",
+					"        \r\n",
+					"data_frame_list_final.extend(data_frame_list)\r\n",
+					"data_frame_inverter_downtime_list_final.extend(data_frame_inverter_downtime_list)\r\n",
+					"print(len(data_frame_list_final))"
+				],
+				"execution_count": 245
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data_frame_list_final"
+				],
+				"execution_count": 261
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"columns=[\"itemname\",\"Downtime\",\"up_time\",\"Sleep_time\",\"OperationMinutes\",\"RunningMinutes\",\"Average_Efficiency\",\"Max_Efficiency\",\"EnergyLoss\"]\r\n",
+					"df_main1=pd.DataFrame(data_frame_list_final,columns=columns)\r\n",
+					"#df_main1['Date'] = df_main1['Date'].astype('datetime64[ns]')\r\n",
+					"#df_main1.to_excel(\"InverterT2ExtensioB2.xlsx\")"
+				],
+				"execution_count": 262
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_main1"
+				],
+				"execution_count": 263
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"columns1=[\"Date\",\"Inv\",\"Down_From\",\"Down_To\",\"Minutes\"]\r\n",
+					"df_main2=pd.DataFrame(data_frame_inverter_downtime_list_final,columns=columns1)"
+				],
+				"execution_count": 264
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_main2=df_main2[df_main2[\"Minutes\"]!=0]\r\n",
+					"df_main2"
+				],
+				"execution_count": 265
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"if len(df_main2)!=0:\r\n",
+					"    df_spark3=spark.createDataFrame(df_main2)\r\n",
+					"    spark.sql(\"create database if not exists reassetsPhelan\")\r\n",
+					"    df_spark3.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassetsPhelan.invdowntime\")"
+				],
+				"execution_count": 266
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_main1[\"ICR\"]=df_main1[\"itemname\"].apply(lambda x:x.split(\"_\")[0])\r\n",
+					"df_main1[\"INV\"]=df_main1[\"itemname\"].apply(lambda x:x.split(\"_\")[1].split('_')[0])\r\n",
+					"ICR_dict={\"ITC1\":\"ICR01\",\r\n",
+					"         \"ITC2\":\"ICR02\",\r\n",
+					"         \"ITC3\":\"ICR03\",\r\n",
+					"         \"ITC4\":\"ICR04\"}\r\n",
+					"df_main1[\"ICR\"].replace(ICR_dict,inplace=True)\r\n",
+					"\r\n",
+					"df_main1[\"Inv\"]=df_main1[\"ICR\"].str[0]+df_main1[\"ICR\"].str[-2:]+\"_\"+df_main1[\"INV\"].str[-1]\r\n",
+					"\r\n",
+					"#df_main1[\"Inv\"]=df_main1[\"ICR\"].str[0]+df_main1[\"ICR\"].str[-1:]+\"_\"+df_main1[\"INV\"].str[-1]"
+				],
+				"execution_count": 267
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfc1"
+				],
+				"execution_count": 268
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Table2_Final=pd.merge(dfc1,df_main1,on=\"Inv\",how=\"inner\")"
+				],
+				"execution_count": 269
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Table2_Final = Table2_Final.rename(columns={'value': 'Inverter_Energy'})"
+				],
+				"execution_count": 270
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Table2_Final=Table2_Final[[\"Date\",\"itemname_x\",\"Inv\",\"Inverter_Energy\",\"Downtime\",\"up_time\",\"Sleep_time\",\"OperationMinutes\",\"RunningMinutes\",\"Average_Efficiency\",\"Max_Efficiency\",\"EnergyLoss\"]]\r\n",
+					"Table2_Final = Table2_Final.rename(columns={'itemname_x': 'itemname',\r\n",
+					"                                           'Inverter_Energy':'InvEnergy',\r\n",
+					"                                           'Downtime':'InvDowntime',\r\n",
+					"                                           'up_time':'InvWakeUp',\r\n",
+					"                                           'Sleep_time':'InvSleep',\r\n",
+					"                                           'OperationMinutes':'InvOperationMinutes',\r\n",
+					"                                           'RunningMinutes':'InvRunningMinutes',\r\n",
+					"                                           'Average_Efficiency':'InvAvgEff',\r\n",
+					"                                           'Max_Efficiency':'InvMaxEff',\r\n",
+					"                                           'EnergyLoss':'InvEnergyLoss'})"
+				],
+				"execution_count": 271
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Table2_Final[\"InvEnergy\"]=Table2_Final[\"InvEnergy\"].astype(\"float32\")"
+				],
+				"execution_count": 272
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#location_output = \"abfss://repono@ayanadatalake.dfs.core.windows.net/inverterPerf/\"\r\n",
+					"#Table2_Final.to_excel(location_output+\"inverter.xlsx\",index=False)"
+				],
+				"execution_count": 273
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Table2_Final"
+				],
+				"execution_count": 274
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType,StructField,StringType,DateType,FloatType,LongType,DoubleType\r\n",
+					"schema=StructType([\r\n",
+					"                    StructField(\"Date\",DateType()),\r\n",
+					"                    StructField(\"itemname\",StringType()),\r\n",
+					"                    StructField(\"Inv\",StringType()),\r\n",
+					"                    StructField(\"InvEnergy\",FloatType()),\r\n",
+					"                    StructField(\"InvDowntime\",DoubleType()),\r\n",
+					"                    StructField(\"InvWakeUp\",StringType()),\r\n",
+					"                    StructField(\"InvSleep\",StringType()),\r\n",
+					"                    StructField(\"InvOperationMinutes\",DoubleType()),\r\n",
+					"                    StructField(\"InvRunningMinutes\",DoubleType()),\r\n",
+					"                    StructField(\"InvAvgEff\",DoubleType()),\r\n",
+					"                    StructField(\"InvMaxEff\",DoubleType()),\r\n",
+					"                    StructField(\"InvEnergyLoss\",DoubleType()),\r\n",
+					"])"
+				],
+				"execution_count": 63
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark2=spark.createDataFrame(Table2_Final,schema=schema)\r\n",
+					"spark.sql(\"create database if not exists reassetsPhelan\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassetsPhelan.invperformance\")"
+				],
+				"execution_count": 64
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**BELOW SET OF CODE IS TO GENERATE ALERTS ON LOWEST PERFORMING INVERTERS IN LAST TWO DAYS**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_invperf=spark.sql(\"select * from reassetsPhelan.invperformance order by Date\")\r\n",
+					"df_invperfNOTI=df_invperf.toPandas()"
+				],
+				"execution_count": 65
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_invperfNOTI"
+				],
+				"execution_count": 66
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_Static=pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/Inverter_Table2.csv\")\r\n",
+					"df_Static.head(5)"
+				],
+				"execution_count": 81
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def dataframe_to_dict(df_Static, key_column, value_column):\r\n",
+					"    invDict = df_Static.set_index(key_column)[value_column].to_dict()\r\n",
+					"    return invDict"
+				],
+				"execution_count": 82
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dc_load_mapping_dict=dataframe_to_dict(df_Static,\"Inv\",\"InvDCLoad\")"
+				],
+				"execution_count": 83
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_invperfNOTI[\"InvDCLoad\"]=df_invperfNOTI[\"Inv\"].map(dc_load_mapping_dict)\r\n",
+					"#df_invperfNOTI.head()"
+				],
+				"execution_count": 84
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_invperfNOTI[\"SpY\"] = df_invperfNOTI[\"InvEnergy\"]/df_invperfNOTI[\"InvDCLoad\"]\r\n",
+					"df_invperfNOTI[\"SpyPUT\"] = df_invperfNOTI[\"SpY\"]*df_invperfNOTI[\"InvRunningMinutes\"]\r\n",
+					"\r\n",
+					"df_invperfNOTI[\"Date\"]=df_invperfNOTI[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"df_invperfNOTI[\"Date\"]=df_invperfNOTI[\"Date\"].map(lambda x:str(x).split(\" \")[0])"
+				],
+				"execution_count": 85
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_notifinal=df_invperfNOTI.copy()"
+				],
+				"execution_count": 86
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"today = date.today()\r\n",
+					"td1=today-timedelta(days=1)\r\n",
+					"yesterday=td1-timedelta(days=1)\r\n",
+					"#yesterday = today - timedelta(days = 1)\r\n",
+					"print(td1,yesterday)\r\n",
+					"dftd1=df_notifinal[(df_notifinal[\"Date\"]==str(td1))]\r\n",
+					"dfyes1=df_notifinal[(df_notifinal[\"Date\"]==str(yesterday))]\r\n",
+					"#dftd1"
+				],
+				"execution_count": 87
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"today_list=list(dftd1.sort_values(by=\"SpyPUT\",ascending=True).head(10)[\"Inv\"])\r\n",
+					"today_list"
+				],
+				"execution_count": 88
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"yes1_list=list(dfyes1.sort_values(by=\"SpyPUT\",ascending=True).head(10)[\"Inv\"])\r\n",
+					"yes1_list\r\n",
+					"yes1_list_set = set(yes1_list)\r\n",
+					"today_list_set = set(today_list)\r\n",
+					"if (yes1_list_set & today_list_set):\r\n",
+					"    two_days_set=yes1_list_set & today_list_set\r\n",
+					"two_days_set"
+				],
+				"execution_count": 89
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pymsteams\r\n",
+					"myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/ac6eaf82-b2d0-4b46-8e52-a17f3fc5051d@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ab1320c704ed43e88d7a1fe9b7618ee9/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"myTeamsMessage.text(str(two_days_set))\r\n",
+					"myTeamsMessage.send()"
+				],
+				"execution_count": 90
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**EDITING ANYTHING IN TABLES MANUALLY**"
+				]
+			}
+		]
+	}
+}

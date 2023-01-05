@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 10",
+	"properties": {
+		"content": {
+			"query": "select * from dbo.bkninvperformance",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "bkn1",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

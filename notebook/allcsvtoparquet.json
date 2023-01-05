@@ -1,0 +1,169 @@
+{
+	"name": "allcsvtoparquet",
+	"properties": {
+		"description": "This codes is to read all the daily csv files that are being created in ADLS into parquet format at the desired location",
+		"folder": {
+			"name": "phelan"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "ceb79f8e-e0f3-4375-bfb3-83bfc819af2c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
+				"name": "sparkpool1",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# IMPORTING IMPORTANT LIBRARIES THAT WILL BE USED IN THIS NOTEBOOK\r\n",
+					"\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pathtoread ='abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/*/*/*'\r\n",
+					"pathtosave =\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/\"\r\n",
+					"\r\n",
+					"tablelisttoreconcile = [\r\n",
+					"    {\r\n",
+					"    \"sitename1\":\"Phelan\",\r\n",
+					"    \"folderpath1\":\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/\",\r\n",
+					"    \"sitename2\":\"Pavgada\",\r\n",
+					"    \"folderpath2\":\"abfss://ayanapavagadadatalake@ayanadatalake.dfs.core.windows.net/PavagadaOpcData/Pavagada_RealTimeTags/\"\r\n",
+					"    }\r\n",
+					"      ]\r\n",
+					"\r\n",
+					"ListLength = len(tablelisttoreconcile)\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0\r\n",
+					""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"while DateLoopCounter < DateListLength: \r\n",
+					"       \r\n",
+					"       site1 = str( tablelisttoreconcile[TableLoopCounter][\"sitename1\"])\r\n",
+					"       location1 = str( tablelisttoreconcile[TableLoopCounter][\"folderpath1\"])   \r\n",
+					"       location1= location1+ str( DateList[DateLoopCounter]).replace(\"-\",\"/\")+\"/*\"\r\n",
+					"       print(site1)\r\n",
+					"       print(location1)   \r\n",
+					"       \r\n",
+					"       site2 = str( tablelisttoreconcile[TableLoopCounter][\"sitename2\"])\r\n",
+					"       location2 = str( tablelisttoreconcile[TableLoopCounter][\"folderpath2\"])    \r\n",
+					"       location2= location2+ str( DateList[DateLoopCounter]).replace(\"-\",\"/\")+\"/*\"\r\n",
+					"       print(site2)\r\n",
+					"       print(location2)   \r\n",
+					"              \r\n",
+					"       df = spark.read.load(location1, format='csv', header=True)\r\n",
+					"       df.createOrReplaceTempView(\"temptable\")\r\n",
+					"       df= spark.sql(\"\"\"select deviceid, \r\n",
+					"       cast(ISTtime as timestamp) as ISTtime, \r\n",
+					"       itemname, cast(value as FLOAT) as value, quality, \r\n",
+					"       cast(timestamp as timestamp) timestamp,\r\n",
+					"       cast(EventProcessedUtcTime  as timestamp) EventProcessedUtcTime,\r\n",
+					"       CAST (PartitionId AS INT), \r\n",
+					"       CAST (EventEnqueuedUtcTime AS timestamp) EventEnqueuedUtcTime,\r\n",
+					"       IoTHub, 1 AS siteid , 'ananthpuram' AS sitename\r\n",
+					"       from temptable \"\"\")\r\n",
+					"       df = df.withColumn(\"dt\",sf.to_date(\"ISTtime\",\"yyyy-MM-dd\"))\r\n",
+					"            \r\n",
+					"       df.coalesce(1).write.parquet(pathtosave,mode=\"append\",partitionBy=\"dt\") \r\n",
+					"       DateLoopCounter += 1"
+				],
+				"execution_count": 5
+			}
+		]
+	}
+}

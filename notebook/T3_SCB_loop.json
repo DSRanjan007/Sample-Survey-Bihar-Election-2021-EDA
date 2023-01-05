@@ -1,0 +1,704 @@
+{
+	"name": "T3_SCB_loop",
+	"properties": {
+		"folder": {
+			"name": "Ananthapur"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool2",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "a886280c-66bd-47dc-b49f-995805631ecd"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool2",
+				"name": "Sparkpool2",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool2",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\n",
+					"import numpy as np\n",
+					"import matplotlib.pyplot as plt"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"#import pymsteams"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from datetime import date\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"start_date = date(2022,2,23)\r\n",
+					"days=abs(todaydate-start_date).days\r\n",
+					"days"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= days :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"#print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0\r\n",
+					"\r\n",
+					"location1 = pattoreadparquet   \r\n",
+					"DateList=DateList[::-1]\r\n",
+					"print(DateList)\r\n",
+					"#location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
+					"#print(location1)"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadparquet   \r\n",
+					"location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
+					"print(location1)"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2=pd.read_parquet(\"2Mar.parquet\")\n",
+					"df2.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\n",
+					"df2=df2[df2[\"sitename\"]==\"ananthpuram\"]\n",
+					"df2.drop([\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\",\"siteid\",\"sitename\"],axis=1,inplace=True)"
+				],
+				"execution_count": 534
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"ISTtime\"]=df2[\"ISTtime\"].astype(\"datetime64[ns]\")"
+				],
+				"execution_count": 535
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"Date\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).date"
+				],
+				"execution_count": 536
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"Time\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).time"
+				],
+				"execution_count": 537
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"\n",
+					"df2[\"Hour\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).hour"
+				],
+				"execution_count": 538
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"Minute\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).minute\n",
+					"df2=df2[(df2[\"Hour\"]>=6) & (df2[\"Hour\"]<=19)]"
+				],
+				"execution_count": 539
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2.head()"
+				],
+				"execution_count": 540
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"x2=pd.read_excel(\"Copy of OperationalTagsof SCBs (003).xlsx\",sheet_name=\"Latest\")\n",
+					"x2.head()"
+				],
+				"execution_count": 541
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"len(x2)"
+				],
+				"execution_count": 542
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"wms_list=[\"ICR13..WMS.GTI_W\",\"ICR17..WMS.GTI_W\",\"ICR1..WMS.GTI_W\",\"MCR..MCR_WMS.GTI_W\",\"ICR7..WMS.GTI_W\",\n",
+					"         \"ICR13..WMS.AMBIENT_TEMP\",\"ICR17..WMS.AMBIENT_TEMP\",\"ICR1..WMS.AMBIENT_TEMP\",\"ICR14..WMS.AMBIENT_TEMP\",\"ICR7..WMS.AMBIENT_TEMP\",\n",
+					"         \"ICR13..MT1.MODULE_TEMP1\",\"ICR17..MT1.MODULE_TEMP_2\",\"ICR1..MT1.MODULE_TEMP_2\",\"ICR14..MT1.MODULE_TEMP\",\"ICR7..MT1.MODULE_TEMP_1\"]\n",
+					"op_tag=x2[\"SCB\"].to_list()\n",
+					"op_tag.extend(wms_list)"
+				],
+				"execution_count": 543
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"len(op_tag)"
+				],
+				"execution_count": 544
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"len(df2[\"itemname\"].unique())"
+				],
+				"execution_count": 545
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2=df2.copy()\n",
+					"df2=df2[df2[\"itemname\"].isin(op_tag)]\n",
+					"len(df2[\"itemname\"].unique())"
+				],
+				"execution_count": 546
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[df2[\"itemname\"]==\"ICR7..MT1.MODULE_TEMP_1\"].head(1)"
+				],
+				"execution_count": 547
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2.head()"
+				],
+				"execution_count": 548
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"SPP\"]=\"Antpr\""
+				],
+				"execution_count": 549
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2_x1=df2[df2['itemname'].str.startswith('ICR', na=True)]\n",
+					"df2_x2=df2[df2['itemname'].str.startswith('MCR..MCR_WMS.GTI_W', na=True)]\n",
+					"df2=pd.concat((df2_x1,df2_x2),axis=0)\n",
+					"df2_x2.head()"
+				],
+				"execution_count": 550
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2=df2[df2['itemname'].str.contains(\"SCB|WMS.GTI_W|MCR..MCR_WMS.GTI_W|WMS.AMBIENT_TEMP|MT1.MODULE_TEMP1|MT1.MODULE_TEMP2|MT1.MODULE_TEMP\", na=True)]\n",
+					"df2.head()"
+				],
+				"execution_count": 551
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"ICR\"]=df2[\"itemname\"].apply(lambda x:x.split(\"..\")[0])"
+				],
+				"execution_count": 552
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"INV\"]=df2[\"itemname\"].apply(lambda x:x.split(\"..\")[1].split('.')[0])"
+				],
+				"execution_count": 553
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"SCB\"]=df2[\"itemname\"].apply(lambda x:x.split(\"..\")[1].split('.')[1])"
+				],
+				"execution_count": 554
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2.head()"
+				],
+				"execution_count": 555
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"Blocklist=[]\n",
+					"for i in range(len(df2)):\n",
+					"    if df2.iloc[i,1].split(\"..\")[0] in [\"ICR8\",\"ICR10\",\"ICR12\",\"ICR13\"]:\n",
+					"        Blocklist.append(\"Ananthapur1\")\n",
+					"    elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR16\",\"ICR17\",\"ICR18\",\"ICR19\"]:\n",
+					"        Blocklist.append(\"Ananthapur2\")\n",
+					"    elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR1\",\"ICR2\",\"ICR3\",\"ICR4\"]:\n",
+					"        Blocklist.append(\"Ananthapur3\")\n",
+					"    elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR11\",\"ICR14\",\"ICR15\",\"ICR20\",\"MCR\"]:\n",
+					"        Blocklist.append(\"Ananthapur4\")\n",
+					"    elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR5\",\"ICR6\",\"ICR7\",\"ICR9\"]:\n",
+					"        Blocklist.append(\"Ananthapur5\")"
+				],
+				"execution_count": 556
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"Block\"]=Blocklist"
+				],
+				"execution_count": 557
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2.head()"
+				],
+				"execution_count": 558
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[df2[\"Minute\"]==59]"
+				],
+				"execution_count": 559
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"Minute\"].dtypes"
+				],
+				"execution_count": 560
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"def grouped_min(value):\n",
+					"    if value in range(0,5):\n",
+					"        return 4\n",
+					"    elif value in range(6,10):\n",
+					"        return 9\n",
+					"    elif value in range(11,15):\n",
+					"        return 14\n",
+					"    elif value in range(16,20):\n",
+					"        return 19\n",
+					"    elif value in range(21,25):\n",
+					"        return 24\n",
+					"    elif value in range(26,30):\n",
+					"        return 29\n",
+					"    elif value in range(31,35):\n",
+					"        return 34\n",
+					"    elif value in range(36,40):\n",
+					"        return 39\n",
+					"    elif value in range(41,45):\n",
+					"        return 44\n",
+					"    elif value in range(46,50):\n",
+					"        return 49\n",
+					"    elif value in range(51,55):\n",
+					"        return 54\n",
+					"    elif value in range(56,59):\n",
+					"        return 59"
+				],
+				"execution_count": 561
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[\"grouped_min\"]=df2[\"Minute\"].apply(grouped_min)"
+				],
+				"execution_count": 562
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2[df2[\"Minute\"]==54]"
+				],
+				"execution_count": 563
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2c=df2.groupby(by=[\"itemname\",\"Hour\",\"grouped_min\"]).agg(\"max\").reset_index()\n",
+					"df2c"
+				],
+				"execution_count": 564
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2c=df2c.set_index(\"Date\")"
+				],
+				"execution_count": 565
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2c.drop(\"ISTtime\",inplace=True,axis=1)"
+				],
+				"execution_count": 566
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2c.head()"
+				],
+				"execution_count": 567
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2c=df2c[[\"Time\",\"Hour\",\"Minute\",\"grouped_min\",\"SPP\",\"Block\",\"ICR\",\"INV\",\"SCB\",\"itemname\",\"value\"]]\n",
+					"df2c.head()"
+				],
+				"execution_count": 568
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"ICR_dict={\"ICR1\":\"ICR01\",\n",
+					"         \"ICR2\":\"ICR02\",\n",
+					"         \"ICR3\":\"ICR03\",\n",
+					"         \"ICR4\":\"ICR04\",\n",
+					"         \"ICR5\":\"ICR05\",\n",
+					"         \"ICR6\":\"ICR06\",\n",
+					"         \"ICR7\":\"ICR07\",\n",
+					"         \"ICR8\":\"ICR08\",\n",
+					"         \"ICR9\":\"ICR09\"}\n",
+					"df2c[\"ICR\"].replace(ICR_dict,inplace=True)"
+				],
+				"execution_count": 569
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df2c.to_excel(\"TABLE3_FINAL1.xlsx\")"
+				],
+				"execution_count": 570
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df=pd.read_excel('TABLE3_FINAL1.xlsx',parse_dates=['Time'])\n",
+					"df.head()"
+				],
+				"execution_count": 571
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df.shape"
+				],
+				"execution_count": 572
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df[\"SCB\"].unique()"
+				],
+				"execution_count": 573
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#df.itemname = df.itemname.astype(\"category\")\n",
+					"#df.head()"
+				],
+				"execution_count": 574
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df_final=df.copy()\n",
+					"df_final=df_final[df_final[\"itemname\"].isin(op_tag)]\n",
+					"#df_final.shape"
+				],
+				"execution_count": 575
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"len(op_tag)"
+				],
+				"execution_count": 576
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"len(df_final[\"itemname\"].unique())"
+				],
+				"execution_count": 577
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df.head()"
+				],
+				"execution_count": 578
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"x1=pd.crosstab(index=[df[\"Block\"],df[\"Date\"],df[\"Hour\"],df[\"grouped_min\"]],columns=df[\"itemname\"],values=df[\"value\"],aggfunc=np.mean)\n",
+					"x1.reset_index()\n",
+					"#x1.reset_index().to_excel(\"table3_column_wise1.xlsx\")"
+				],
+				"execution_count": 579
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#ICR13..WMS.GTI_W B1\n",
+					"#ICR17..WMS.GTI_W B2\n",
+					"#ICR16..WMS.GTI_W B2\n",
+					"#ICR1..WMS.GTI_W B3\n",
+					"#MCR..MCR_WMS.GTI_W B4\n",
+					"##ICR7..WMS.GTI_W B5"
+				],
+				"execution_count": 580
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"x1=x1.reset_index()\n",
+					"x1.head()"
+				],
+				"execution_count": 581
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#ICR13..WMS.GTI_W B1\n",
+					"#ICR17..WMS.GTI_W B2\n",
+					"#ICR16..WMS.GTI_W B2\n",
+					"#ICR1..WMS.GTI_W B3\n",
+					"#MCR..MCR_WMS.GTI_W B4\n",
+					"##ICR7..WMS.GTI_W B5"
+				],
+				"execution_count": 582
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"ml5=['Block', 'Date', 'Hour', 'grouped_min', 'ICR13..WMS.GTI_W', 'ICR17..WMS.GTI_W', 'ICR1..WMS.GTI_W','MCR..MCR_WMS.GTI_W','ICR7..WMS.GTI_W',\n",
+					"    \"ICR13..WMS.AMBIENT_TEMP\",\"ICR17..WMS.AMBIENT_TEMP\",\"ICR1..WMS.AMBIENT_TEMP\",\"ICR7..WMS.AMBIENT_TEMP\",\n",
+					"         \"ICR13..MT1.MODULE_TEMP1\",\"ICR17..MT1.MODULE_TEMP_2\",\"ICR1..MT1.MODULE_TEMP_2\",\"ICR14..MT1.MODULE_TEMP\",\"ICR7..MT1.MODULE_TEMP_1\"]\n",
+					"print(ml5)\n",
+					"x11=x1[ml5]\n",
+					"x11.head()\n",
+					"x1.drop(ml5,axis=1,inplace=True)\n",
+					"x1.head()"
+				],
+				"execution_count": 583
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#ICR13..WMS.GTI_W B1\n",
+					"#ICR17..WMS.GTI_W B2\n",
+					"#ICR16..WMS.GTI_W B2\n",
+					"#ICR1..WMS.GTI_W B3\n",
+					"#MCR..MCR_WMS.GTI_W B4\n",
+					"##ICR7..WMS.GTI_W B5\n",
+					""
+				],
+				"execution_count": 584
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"print(x1.shape)\n",
+					"print(x11.shape)\n",
+					"dfc3_1=pd.concat((x11,x1),axis=1)\n",
+					"dfc3_1.head()"
+				],
+				"execution_count": 585
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"def block_dataframe(x1,*block_no):\n",
+					"    for i in block_no:\n",
+					"        if i==4:\n",
+					"            #print(i)\n",
+					"            Ambient_temp=x1[x1[\"Block\"]==\"Ananthapur2\"][[\"ICR17..WMS.AMBIENT_TEMP\"]]\n",
+					"            #print(Ambient_temp)\n",
+					"            df_block=x1[x1[\"Block\"]==\"Ananthapur\"+str(i)]\n",
+					"            #print(df_block)\n",
+					"            df_block.dropna(axis=1,inplace=True)\n",
+					"            #print(df_block)\n",
+					"            df_block[\"ICR17..WMS.AMBIENT_TEMP\"]=Ambient_temp\n",
+					"            ml5=['Block', 'Date', 'Hour', 'grouped_min','MCR..MCR_WMS.GTI_W',\"ICR17..WMS.AMBIENT_TEMP\",\"ICR14..MT1.MODULE_TEMP\"]\n",
+					"            #print(ml5)\n",
+					"            x11=df_block[ml5]\n",
+					"            #print(x11)\n",
+					"            df_block.drop(ml5,axis=1,inplace=True)\n",
+					"            #print(df_block)\n",
+					"            df_block=pd.concat((x11,df_block),axis=1)\n",
+					"            #print(df_block)\n",
+					"            df_block_previous=pd.read_excel(\"df_block\"+str(i)+\".xlsx\",index_col=0)\n",
+					"            df_block_previous=df_block_previous.append(df_block)\n",
+					"            df_block_previous.to_excel(\"df_block\"+str(i)+\".xlsx\")\n",
+					"        else:\n",
+					"            \n",
+					"            df_block=x1[x1[\"Block\"]==\"Ananthapur\"+str(i)]\n",
+					"            df_block.dropna(axis=1,inplace=True)\n",
+					"            df_block_previous=pd.read_excel(\"df_block\"+str(i)+\".xlsx\",index_col=0)\n",
+					"            df_block_previous=df_block_previous.append(df_block)\n",
+					"            df_block_previous.to_excel(\"df_block\"+str(i)+\".xlsx\")"
+				],
+				"execution_count": 586
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"block_tuple=(1,2,3,4,5)\n",
+					"block_dataframe(dfc3_1,*block_tuple)"
+				],
+				"execution_count": 587
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#df_block1=x1[x1[\"Block\"]==\"Ananthapur1\"]\n",
+					"#df_block1.dropna(axis=1,inplace=True)\n",
+					"#df_block1"
+				],
+				"execution_count": 588
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

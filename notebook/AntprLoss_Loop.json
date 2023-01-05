@@ -1,0 +1,632 @@
+{
+	"name": "AntprLoss_Loop",
+	"properties": {
+		"folder": {
+			"name": "Ananthapur"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b5317f5f-7bd8-470c-a98c-604837c21a8f"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df=spark.sql(\"select * from reassets.antprdayconsolidated order by date,Block\")\r\n",
+					"df1=df.toPandas()\r\n",
+					"df1[\"Date\"]=df1[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"#df2=df1.tail().copy()\r\n",
+					"df1"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1[\"PVSyst_PR\"]=(df1[\"PVSyst_EGrid\"]/df1[\"DC_Capacity\"])/df1[\"PVSyst_GII\"]\r\n",
+					"df1[\"Ins.Delta\"]=(df1[\"GII\"]-df1[\"PVSyst_GII\"])/df1[\"PVSyst_GII\"]\r\n",
+					"df1[\"YesterdayImportEnergyMeter\"]=df1.sort_values(by=['Block','Date'],ascending=True).groupby(by=[\"Block\"])[\"ImportEnergyMeter\"].shift(1)\r\n",
+					"df1[\"ImportEnergy\"]=(df1[\"ImportEnergyMeter\"]-df1[\"YesterdayImportEnergyMeter\"])*360\r\n",
+					"#df1.sort_values(by=['Block','Date'],ascending=True)\r\n",
+					"df1[\"NetEnergy\"]=df1[\"ExportEnergy\"]-df1[\"ImportEnergy\"]\r\n",
+					"df1[\"Radiation_Loss\"]=(((df1[\"PVSyst_PR\"]*(df1[\"PVSyst_GII\"]-df1[\"GII\"])*df1[\"DC_Capacity\"]*df1[\"GA\"])/100)/df1[\"NetEnergy\"])*100\r\n",
+					"df1[\"AC_Loss\"]=((df1[\"InvEnergy\"]-df1[\"NetEnergy\"])/df1[\"InvEnergy\"])*100\r\n",
+					"df1[\"PR\"]=(((df1[\"NetEnergy\"]/df1[\"DC_Capacity\"])/df1[\"GII\"])/df1[\"GA\"])*10000\r\n",
+					"df1[\"PR_t\"] = (df1[\"PR\"])/(1-(-0.0042*(df1[\"PVSyst_TArray_Avg\"]-df1[\"Tm\"])))\r\n",
+					"df1[\"TempLoss\"] = (((df1[\"PR_t\"])-(df1[\"PR\"]))*(df1[\"DC_Capacity\"])*(df1[\"GII\"])*(df1[\"GA\"])/10000/df1[\"NetEnergy\"])*100"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=df1[df1[\"Date\"].isin([\"2022-05-05\",\"2022-05-06\",\"2022-05-07\",\"2022-05-08\",\"2022-05-09\",\"2022-05-10\",\"2022-05-11\",\"2022-05-12\",\"2022-05-13\",\"2022-05-14\",\"2022-05-15\",\"2022-05-16\",\"2022-05-17\",\"2022-05-18\",\"2022-05-19\",\"2022-05-20\",\"2022-05-21\",\"2022-05-22\",\"2022-05-23\",\"2022-05-24\",\"2022-05-25\",\"2022-05-26\",\"2022-05-27\",\"2022-05-28\",\"2022-05-29\",\"2022-05-30\"])]\r\n",
+					"df2"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_block1=df2[[\"Date\",\"Block\",\"Radiation_Loss\",\"AC_Loss\",\"TempLoss\"]]\r\n",
+					"df_block1"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd\r\n",
+					"df_loss_final=pd.melt(df_block1, id_vars =[\"Date\",\"Block\"], value_vars =['Radiation_Loss', 'AC_Loss','TempLoss'])\r\n",
+					"df_loss_final"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"drop table reassets.antprloss\")"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark2=spark.createDataFrame(df_loss_final)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.AntprLoss\")"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"invclip=spark.sql(\"select * from reassets.invclip where date in ('2022-05-05','2022-05-06','2022-05-07','2022-05-08','2022-05-09','2022-05-10','2022-05-11','2022-05-12','2022-05-13','2022-05-14','2022-05-15','2022-05-16','2022-05-17','2022-05-18','2022-05-19','2022-05-20','2022-05-21','2022-05-22','2022-05-23','2022-05-24','2022-05-25','2022-05-26','2022-05-27','2022-05-28','2022-05-29','2022-05-30') order by date,Block \")\r\n",
+					"display(invclip)\r\n",
+					"df4=invclip.toPandas()\r\n",
+					"df4[\"Date\"]=df4[\"Date\"].astype(\"datetime64[ns]\")"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv_clip_loss=(df4.groupby([\"Date\",\"Block\"]).sum()/1000).reset_index()"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import numpy as np"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pd.pivot_table(data=inv_clip_loss,index=[\"Date\"],columns=[\"Block\"],values=[\"Loss\"],aggfunc=\"count\")"
+				],
+				"execution_count": 25
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv_downtime[\"InvDowntimeLoss\"]/df2[df2[\"Date\"]!=\"2022-05-18\"][\"NetEnergy\"].values"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv_clip_loss[\"Inv_Clip_Loss\"]=(inv_clip_loss[inv_clip_loss[\"Date\"]!=\"2022-05-26\"][\"Loss\"]/df2[df2[\"Date\"]!=\"2022-05-26\"][\"NetEnergy\"].values)*100\r\n",
+					"inv_clip_loss"
+				],
+				"execution_count": 27
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd\r\n",
+					"df_loss_final=pd.melt(inv_clip_loss, id_vars =[\"Date\",\"Block\"], value_vars =['Inv_Clip_Loss'])\r\n",
+					"df_loss_final"
+				],
+				"execution_count": 28
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark2=spark.createDataFrame(df_loss_final)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.AntprLoss\")"
+				],
+				"execution_count": 29
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"inv_downtime=spark.sql(\"select * from reassets.invperformance order by date desc\")\r\n",
+					"display(inv_downtime)\r\n",
+					"inv_downtime=inv_downtime.toPandas()\r\n",
+					"inv_downtime[\"Date\"]=inv_downtime[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"inv_downtime=inv_downtime[inv_downtime[\"Date\"].isin([\"2022-05-05\",\"2022-05-06\",\"2022-05-07\",\"2022-05-08\",\"2022-05-09\",\"2022-05-10\",\"2022-05-11\",\"2022-05-12\",\"2022-05-13\",\"2022-05-14\",\"2022-05-15\",\"2022-05-16\",\"2022-05-17\",\"2022-05-18\",\"2022-05-19\",\"2022-05-20\",\"2022-05-21\",\"2022-05-22\",\"2022-05-23\",\"2022-05-24\",\"2022-05-25\",\"2022-05-26\",\"2022-05-27\",\"2022-05-28\",\"2022-05-29\",\"2022-05-30\"])].copy()\r\n",
+					"inv_downtime\r\n",
+					"Blocklist=[]\r\n",
+					"for i in range(len(inv_downtime)):\r\n",
+					"    if inv_downtime.iloc[i,2].split(\"_\")[0] in [\"I08\",\"I10\",\"I12\",\"I13\"]:\r\n",
+					"        #print(inv_downtime.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr1\")\r\n",
+					"    elif inv_downtime.iloc[i,2].split(\"_\")[0] in [\"I16\",\"I17\",\"I18\",\"I19\"]:\r\n",
+					"        #print(inv_downtime.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr2\")\r\n",
+					"    elif inv_downtime.iloc[i,2].split(\"_\")[0] in [\"I01\",\"I02\",\"I03\",\"I04\"]:\r\n",
+					"        #print(inv_downtime.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr3\")\r\n",
+					"    elif inv_downtime.iloc[i,2].split(\"_\")[0] in [\"I11\",\"I14\",\"I15\",\"I20\"]:\r\n",
+					"        #print(inv_downtime.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr4\")\r\n",
+					"    elif inv_downtime.iloc[i,2].split(\"_\")[0] in [\"I05\",\"I06\",\"I07\",\"I09\"]:\r\n",
+					"        #print(inv_downtime.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr5\")\r\n",
+					"Blocklist\r\n",
+					"inv_downtime[\"Block\"]=Blocklist\r\n",
+					"inv_downtime=(inv_downtime.groupby([\"Date\",\"Block\"]).sum()).reset_index()\r\n",
+					"inv_downtime"
+				],
+				"execution_count": 30
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv_downtime=inv_downtime[[\"Date\",\"Block\",\"InvEnergyLoss\"]]\r\n",
+					"inv_downtime.rename(columns = {\"InvEnergyLoss\":\"InvDowntimeLoss\"}, inplace = True)"
+				],
+				"execution_count": 31
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"len(df2)"
+				],
+				"execution_count": 32
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2[df2[\"Date\"]!=\"2022-05-18\"][\"NetEnergy\"].values"
+				],
+				"execution_count": 33
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2.head(65)[\"NetEnergy\"].values"
+				],
+				"execution_count": 34
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv_downtime[\"InvDowntimeLoss\"]=((inv_downtime[\"InvDowntimeLoss\"]/df2[df2[\"Date\"]!=\"2022-05-18\"][\"NetEnergy\"].values)/1000)*100"
+				],
+				"execution_count": 35
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"#inv_downtime[\"InvDowntimeLoss\"]=((inv_downtime[\"InvDowntimeLoss\"]/df2[\"NetEnergy\"].values)/1000)*100\r\n",
+					"display(inv_downtime)\r\n",
+					"import pandas as pd\r\n",
+					"df_loss_final=pd.melt(inv_downtime, id_vars =[\"Date\",\"Block\"], value_vars =['InvDowntimeLoss'])\r\n",
+					"display(df_loss_final)\r\n",
+					"df_spark2=spark.createDataFrame(df_loss_final)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.AntprLoss\")"
+				],
+				"execution_count": 36
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"inveff=spark.sql(\"select * from reassets.invperformance order by date desc\")\r\n",
+					"display(inveff)\r\n",
+					"inveff=inveff.toPandas()\r\n",
+					"inveff[\"Date\"]=inveff[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"inveff=inveff[inveff[\"Date\"].isin([\"2022-05-05\",\"2022-05-06\",\"2022-05-07\",\"2022-05-08\",\"2022-05-09\",\"2022-05-10\",\"2022-05-11\",\"2022-05-12\",\"2022-05-13\",\"2022-05-14\",\"2022-05-15\",\"2022-05-16\",\"2022-05-17\",\"2022-05-18\",\"2022-05-19\",\"2022-05-20\",\"2022-05-21\",\"2022-05-22\",\"2022-05-23\",\"2022-05-24\",\"2022-05-25\",\"2022-05-26\",\"2022-05-27\",\"2022-05-28\",\"2022-05-29\",\"2022-05-30\"])].copy()\r\n",
+					"#inveff=inveff[inveff[\"Date\"].isin([\"2022-05-20\"])].copy()\r\n",
+					"\r\n",
+					"inveff\r\n",
+					"Blocklist=[]\r\n",
+					"for i in range(len(inveff)):\r\n",
+					"    if inveff.iloc[i,2].split(\"_\")[0] in [\"I08\",\"I10\",\"I12\",\"I13\"]:\r\n",
+					"        #print(inveff.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr1\")\r\n",
+					"    elif inveff.iloc[i,2].split(\"_\")[0] in [\"I16\",\"I17\",\"I18\",\"I19\"]:\r\n",
+					"        #print(inveff.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr2\")\r\n",
+					"    elif inveff.iloc[i,2].split(\"_\")[0] in [\"I01\",\"I02\",\"I03\",\"I04\"]:\r\n",
+					"        #print(inveff.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr3\")\r\n",
+					"    elif inveff.iloc[i,2].split(\"_\")[0] in [\"I11\",\"I14\",\"I15\",\"I20\"]:\r\n",
+					"        #print(inveff.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr4\")\r\n",
+					"    elif inveff.iloc[i,2].split(\"_\")[0] in [\"I05\",\"I06\",\"I07\",\"I09\"]:\r\n",
+					"        #print(inveff.iloc[i,2].split(\"_\")[0])\r\n",
+					"        Blocklist.append(\"Antpr5\")\r\n",
+					"Blocklist\r\n",
+					"inveff[\"Block\"]=Blocklist\r\n",
+					"inveff=(inveff.groupby([\"Date\",\"Block\"]).mean()).reset_index()\r\n",
+					"inveff"
+				],
+				"execution_count": 37
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inveff=inveff[[\"Date\",\"Block\",\"InvAvgEff\"]]\r\n",
+					"inveff.rename(columns = {\"InvAvgEff\":\"InvAvgEff_Loss\"}, inplace = True)"
+				],
+				"execution_count": 38
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"inveff[\"InvAvgEff_Loss\"]=100-(inveff[\"InvAvgEff_Loss\"])\r\n",
+					"display(inveff)\r\n",
+					"import pandas as pd\r\n",
+					"df_loss_final=pd.melt(inveff, id_vars =[\"Date\",\"Block\"], value_vars =['InvAvgEff_Loss'])\r\n",
+					"display(df_loss_final)\r\n",
+					"df_spark2=spark.createDataFrame(df_loss_final)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.AntprLoss\")"
+				],
+				"execution_count": 39
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df = spark.sql(\"select * from reassets.antprloss\")\r\n",
+					"display(df)"
+				],
+				"execution_count": 17
+			}
+		]
+	}
+}

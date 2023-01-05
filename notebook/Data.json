@@ -1,0 +1,315 @@
+{
+	"name": "Data",
+	"properties": {
+		"folder": {
+			"name": "Bikaner"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool2",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "45f9eb85-0642-4da9-a33e-9a568f1a143f"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool2",
+				"name": "Sparkpool2",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool2",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\r\n",
+					"import numpy as np\r\n",
+					"import datetime\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"import os\r\n",
+					"from pathlib import Path\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')"
+				],
+				"execution_count": 111
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"datetime_Now = datetime.now(tz)\r\n",
+					"current_time=datetime_Now.strftime('%H:%M:%S')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate,current_time)"
+				],
+				"execution_count": 112
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"path='abfss://acmerealtime@ayanadatalake.dfs.core.windows.net/ACME_realtime/*'\r\n",
+					"path2='abfss://ayanaananthpuramrealtime@ayanadatalake.dfs.core.windows.net/ananthapuram_realtime_tags/'\r\n",
+					"pattoreadcsv_a = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_d/\"\r\n",
+					"pattoreadcsv_b = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_opcda/\"\r\n",
+					"path3='abfss://chikodi@ayanadatalake.dfs.core.windows.net/chikodi_cmx/'\r\n",
+					"path4='abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/'\r\n",
+					"path5_a='abfss://ayanapavagadadatalake@ayanadatalake.dfs.core.windows.net/PavagadaOpcData/Pavagada_RealTimeTags/'\r\n",
+					"path5_b='abfss://ayanapavagadadatalake@ayanadatalake.dfs.core.windows.net/PavagadaOpcData/Pavagada_RealTime_OpcUa/'"
+				],
+				"execution_count": 113
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"p=[path,path2,pattoreadcsv_a,pattoreadcsv_b,path3,path4,path5_a,path5_b]"
+				],
+				"execution_count": 114
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def path(p):\r\n",
+					"    pl=[]\r\n",
+					"    for i in p:\r\n",
+					"        location = i \r\n",
+					"        location= location+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"        pl.append(location)\r\n",
+					"    return pl  \r\n",
+					"locations=path(p)\r\n",
+					"locations "
+				],
+				"execution_count": 115
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def fd(x,SPP):\r\n",
+					"    loop=0\r\n",
+					"    try:\r\n",
+					"\r\n",
+					"        for i in range(len(locations)):     \r\n",
+					"            if i==x:\r\n",
+					"                df2_a = spark.read.load(locations[i], format='csv', header=True)\r\n",
+					"                df2_a=df2_a.toPandas()\r\n",
+					"        return df2_a\r\n",
+					"    except:\r\n",
+					"        todaydate = datetime.date(datetime.now(tz))\r\n",
+					"        data=\"Folder not found in \"+SPP+\" for \"+str(todaydate)\r\n",
+					"        data=str(data)\r\n",
+					"        print(data)\r\n",
+					"        #print('Data not found in',SPP,\"for\",todaydate)"
+				],
+				"execution_count": 116
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1=fd(0,\"Acme\")\r\n",
+					"df2=fd(1,\"Ananthapuram\")\r\n",
+					"dff1=fd(2,\"Bikaner_4841_d\")\r\n",
+					"dff2=fd(3,\"Bikaner_opcda\")\r\n",
+					"df4=fd(4,\"Chikodi\")\r\n",
+					"df5=fd(5,\"Phelan\")\r\n",
+					"dff3=fd(6,\"Pavagada_RealTimeTags\")\r\n",
+					"dff4=fd(7,\"Pavagada_Opcua\")\r\n",
+					"data=[df1,df2,dff1,dff2,df4,df5,dff3,dff4]"
+				],
+				"execution_count": 117
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"    for i in data:\r\n",
+					"        if i is None:\r\n",
+					"            exit\r\n",
+					"        else:\r\n",
+					"\r\n",
+					"            i.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"            todaydate = datetime.date(datetime.now(tz))\r\n",
+					"            i.drop([\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],axis=1,inplace=True)\r\n",
+					"            i[\"ISTtime\"]=i[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"            i[\"value\"]=i[\"value\"].astype(\"float64\")\r\n",
+					"            i[\"Date\"]=pd.DatetimeIndex(i[\"ISTtime\"]).date\r\n",
+					"            i[\"Time\"]=pd.DatetimeIndex(i[\"ISTtime\"]).time\r\n",
+					"            i[\"Hour\"]=pd.DatetimeIndex(i[\"ISTtime\"]).hour\r\n",
+					"            i[\"Minute\"]=pd.DatetimeIndex(i[\"ISTtime\"]).minute\r\n",
+					"            #i=i[i[\"Date\"]==todaydate]\r\n",
+					"            i=i[(i[\"Date\"]==todaydate)& (i[\"Hour\"]>=6) & (i[\"Hour\"]<=18)]\r\n",
+					"            tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"            datetime_Now = datetime.now(tz)\r\n",
+					"            current_time=datetime_Now.strftime('%H:%M:%S')\r\n",
+					""
+				],
+				"execution_count": 118
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df1=df1[(df1[\"Date\"]==todaydate)& (df1[\"Hour\"]>=6) & (df1[\"Hour\"]<=18)]\r\n",
+					"df1"
+				],
+				"execution_count": 119
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

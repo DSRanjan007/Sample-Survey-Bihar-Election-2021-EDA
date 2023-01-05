@@ -1,0 +1,1680 @@
+{
+	"name": "BikanerDayCons_Trial",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for DayConsolidated at Portfolio level.",
+		"folder": {
+			"name": "Bikaner"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool5",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "224g",
+			"driverCores": 32,
+			"executorMemory": "224g",
+			"executorCores": 32,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "773b04e1-6f60-42f6-acb7-57c3d0c7df98"
+			}
+		},
+		"metadata": {
+			"saveOutput": false,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool5",
+				"name": "Sparkpool5",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool5",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 32,
+				"memory": 224,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**Bikaner Underperforming SCB**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"#import pymsteams\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadcsv_a = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_opcda/\"\r\n",
+					"pattoreadcsv_b = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_b/\"\r\n",
+					"pattoreadcsv_c = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_c/\"\r\n",
+					"pattoreadcsv_d = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime_4841_d/\"\r\n",
+					"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"#mintime = datetime.min.time()\r\n",
+					"#DateList =[]\r\n",
+					"#while LoopCounter <= 1 :\r\n",
+					"    #DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    #LoopCounter += 1\r\n",
+					"#DateListLength = len(DateList)\r\n",
+					"#print(DateList)\r\n",
+					"#TableLoopCounter = 0\r\n",
+					"#DateLoopCounter = 0"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadcsv_a  \r\n",
+					"location1= location1+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location1)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 332
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location2 = pattoreadcsv_b \r\n",
+					"location2= location2+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location2)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 333
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location3 = pattoreadcsv_c \r\n",
+					"location3= location3+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location3)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 334
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location4 = pattoreadcsv_d \r\n",
+					"location4= location4+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location4)\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 335
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**Loading Spark DataFrame**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_a = spark.read.load(location1, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_a=df2_a.toPandas()\r\n",
+					"df2_a"
+				],
+				"execution_count": 336
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_b = spark.read.load(location2, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_b=df2_b.toPandas()\r\n",
+					"df2_b"
+				],
+				"execution_count": 337
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_c = spark.read.load(location3, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_c=df2_c.toPandas()\r\n",
+					"df2_c"
+				],
+				"execution_count": 338
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df2=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/04/08/*\", format='csv', header=True)\r\n",
+					"df2_d = spark.read.load(location4, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df2_d=df2_d.toPandas()\r\n",
+					"df2_d"
+				],
+				"execution_count": 339
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2=pd.DataFrame()\r\n",
+					"df2=df2.append(df2_a)\r\n",
+					"df2=df2.append(df2_b)\r\n",
+					"df2=df2.append(df2_c)\r\n",
+					"df2=df2.append(df2_d)\r\n",
+					"df2.shape"
+				],
+				"execution_count": 340
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_scb_static=pd.read_excel(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/BIKANER_StringTagnames.xlsx\")\r\n",
+					"df_scb_static"
+				],
+				"execution_count": 341
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"len(df_scb_static)"
+				],
+				"execution_count": 342
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb=df2[df2[\"itemname\"].isin(df_scb_static[\"tagname\"])]\r\n",
+					"len(df2_scb[\"itemname\"].unique())"
+				],
+				"execution_count": 343
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb"
+				],
+				"execution_count": 344
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"tz_india = pytz.timezone('Asia/Kolkata') \r\n",
+					"datetime_Now = datetime.now(tz_india)\r\n",
+					"print(\"NY time:\", datetime_Now.strftime('%Y-%m-%d %H:%M:%S.%f'))\r\n",
+					"before_time=(datetime.now(tz_india)-timedelta(minutes=60))\r\n",
+					"#prev_time=(before_time-timedelta(minutes=30))\r\n",
+					"Four_hours=(before_time-timedelta(minutes=180))\r\n",
+					"current_hour=datetime_Now.hour"
+				],
+				"execution_count": 345
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"before_time"
+				],
+				"execution_count": 346
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"print(current_hour)"
+				],
+				"execution_count": 347
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"before_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"#prev_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"Four_hours.strftime('%Y-%m-%d %H:%M:%S.%f')"
+				],
+				"execution_count": 348
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb.sort_values(by=\"timestamp\",ascending=True,inplace=True)\r\n",
+					"df2_scb.sort_values(by=\"timestamp\",ascending=True,inplace=True)\r\n",
+					"#df=df[df[\"sitename\"]==\"ananthpuram\"]\r\n",
+					"df2_scb.drop([\"deviceid\",\"quality\",\"ISTtime\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],axis=1,inplace=True)\r\n",
+					"df2_scb[\"timestamp\"]=df2_scb[\"timestamp\"].astype(\"datetime64[ns]\")\r\n",
+					"df2_scb[\"value\"]=df2_scb[\"value\"].astype(\"float64\")\r\n",
+					"df2_scb[\"Date\"]=pd.DatetimeIndex(df2_scb[\"timestamp\"]).date\r\n",
+					"df2_scb[\"Time\"]=pd.DatetimeIndex(df2_scb[\"timestamp\"]).time\r\n",
+					"df2_scb[\"Hour\"]=pd.DatetimeIndex(df2_scb[\"timestamp\"]).hour\r\n",
+					"df2_scb[\"Minute\"]=pd.DatetimeIndex(df2_scb[\"timestamp\"]).minute\r\n",
+					"df2_scb=df2_scb[(df2_scb[\"Hour\"]>=6) & (df2_scb[\"Hour\"]<=18)]\r\n",
+					"df3_scb=df2_scb.copy()"
+				],
+				"execution_count": 349
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb"
+				],
+				"execution_count": 350
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#current_time='2022-10-12 10:30:00'  #if manual specificaion is required\r\n",
+					"#before_time='2022-10-12 10:00:00'\r\n",
+					"#prev_time='2022-10-12 09:30:00'"
+				],
+				"execution_count": 351
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"current_time=datetime_Now.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"print(current_time)"
+				],
+				"execution_count": 352
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"before_time=before_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"before_time"
+				],
+				"execution_count": 353
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Four_hours=Four_hours.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"Four_hours"
+				],
+				"execution_count": 354
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb=df2_scb[(df2_scb[\"timestamp\"]<=str(current_time)) & (df2_scb[\"timestamp\"]>=str(before_time))]\r\n",
+					"df2_scb"
+				],
+				"execution_count": 355
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"val=df2_scb.sort_values(['value'],ascending=False)\r\n",
+					"val.head(30)"
+				],
+				"execution_count": 356
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"all_faulty_scb=df2_scb[df2_scb[\"value\"]==0]\r\n",
+					"all_faulty_scb=all_faulty_scb['itemname'].to_list()\r\n",
+					"all_faulty_scb"
+				],
+				"execution_count": 357
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb"
+				],
+				"execution_count": 358
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"len(df2_scb['itemname'].unique())"
+				],
+				"execution_count": 359
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb[\"ICR\"]=df2_scb[\"itemname\"].apply(lambda x:x.split(\".\")[0])\r\n",
+					"df2_scb[\"INV\"]=df2_scb[\"itemname\"].apply(lambda x:x.split(\".\")[1]).apply(lambda x:x.split(\"_\")[0])\r\n",
+					"df2_scb['SMB']=df2_scb[\"itemname\"].apply(lambda x:x.split(\"CURRENT\")[1])"
+				],
+				"execution_count": 360
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df2_scb.head(3)"
+				],
+				"execution_count": 361
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"res1=df2_scb.groupby(['itemname','ICR','INV','SMB']).mean().reset_index()\r\n",
+					"res1.head()"
+				],
+				"execution_count": 362
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"cat_df=res1.copy()\r\n",
+					"cat_df = cat_df.astype({\"SMB\": int})\r\n",
+					"cat_df.loc[cat_df['SMB'] <= 5, 'Category'] = 'Category_1' \r\n",
+					"cat_df.loc[(cat_df['SMB'] >5) & (cat_df['SMB']<=10), 'Category'] = 'Category_2' \r\n",
+					"cat_df.loc[(cat_df['SMB'] >10) & (cat_df['SMB']<=15), 'Category'] = 'Category_3' \r\n",
+					"cat_df.loc[(cat_df['SMB'] >15) & (cat_df['SMB']<=20), 'Category'] = 'Category_4'"
+				],
+				"execution_count": 363
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"cat_df[\"ICR_INV_Cat\"]=cat_df['ICR'] + \"_\" +cat_df['INV'].str.strip().str[-1:]+\"_Cat_\" + cat_df['Category'].str.strip().str[-1:]  \r\n",
+					"cat_df.drop(['SMB','Minute','Hour','ICR','INV'], inplace=True,axis=1)"
+				],
+				"execution_count": 364
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"cat_df"
+				],
+				"execution_count": 365
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"cat_df_max=cat_df.groupby(['ICR_INV_Cat']).max()\r\n",
+					"cat_df_max.rename(columns = {'value':'max'}, inplace = True)\r\n",
+					"cat_df_max.head()"
+				],
+				"execution_count": 366
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"cat_df_max.reset_index()\r\n",
+					"df_max = pd.merge(cat_df, cat_df_max, how='left', on=['ICR_INV_Cat'])\r\n",
+					"df_max.rename(columns = {'itemname_x':'itemname'}, inplace = True)"
+				],
+				"execution_count": 367
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_max"
+				],
+				"execution_count": 368
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_max.drop(['Category_x','itemname_y','Category_y'], inplace=True,axis=1)\r\n",
+					"df_max.sort_values(['ICR_INV_Cat','itemname'])"
+				],
+				"execution_count": 369
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_max['Percentage_change']=((df_max['max']-df_max['value'])/df_max['max'])*100\r\n",
+					"df_max"
+				],
+				"execution_count": 370
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_max.sort_values(['Percentage_change'],ascending=False)"
+				],
+				"execution_count": 371
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"scb_df=df_max[(df_max[\"Percentage_change\"]>=75)]\r\n",
+					"scb_list_df=scb_df['itemname'].to_list()"
+				],
+				"execution_count": 372
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"scb_df_sorted=scb_df.sort_values(by='Percentage_change',ascending=False)"
+				],
+				"execution_count": 373
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_final=scb_df_sorted.copy()\r\n",
+					"df_final[\"To\"]=current_time[:-7]\r\n",
+					"df_final[\"From\"]=before_time[:-7]\r\n",
+					"df_final= df_final[['From','To','itemname','value','max','Percentage_change','ICR_INV_Cat']]\r\n",
+					"df_final=df_final.sort_values(by='ICR_INV_Cat')"
+				],
+				"execution_count": 374
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_final=df_final[df_final['value']!=0]\r\n",
+					"df_final"
+				],
+				"execution_count": 375
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"len(df_final)"
+				],
+				"execution_count": 376
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"x=df_final.sort_values(['Percentage_change'],ascending=False)\r\n",
+					"x.head(20)\r\n",
+					"len(x)"
+				],
+				"execution_count": 377
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/file.xlsx',index_col=0)"
+				],
+				"execution_count": 378
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db"
+				],
+				"execution_count": 379
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#db['To'].unique()"
+				],
+				"execution_count": 380
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db=db.append(df_final)\r\n",
+					"db.to_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/file.xlsx')"
+				],
+				"execution_count": 381
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db"
+				],
+				"execution_count": 316
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"current_time"
+				],
+				"execution_count": 317
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Four_hours"
+				],
+				"execution_count": 318
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"db['To'].unique()"
+				],
+				"execution_count": 54
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_list_time=[10,14,18]\r\n",
+					"if current_hour in df_list_time:\r\n",
+					"    sort=db[(db[\"From\"]<= current_time) & (db[\"From\"]>=Four_hours)]\r\n",
+					"    df=sort.sort_values(['itemname'])\r\n",
+					"    df\r\n",
+					"    df=pd.DataFrame(df.groupby('itemname')['itemname'].count())\r\n",
+					"    df.rename(columns={'itemname':'itemanme','itemname':'count'},inplace=True)\r\n",
+					"    df.reset_index(inplace=True)\r\n",
+					"    values=df[df['count']>=3]\r\n",
+					"    values.reset_index(inplace=True)\r\n",
+					"    values['Time']=current_time\r\n",
+					"    data=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/UnderperformingSCB.xlsx',index_col=0)\r\n",
+					"    data=data.append(values)\r\n",
+					"    data.to_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/UnderperformingSCB.xlsx')\r\n",
+					"    item=list(values['itemname'])\r\n",
+					"    #import pymsteams\r\n",
+					"    #myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/ac6eaf82-b2d0-4b46-8e52-a17f3fc5051d@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ab1320c704ed43e88d7a1fe9b7618ee9/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"    #myTeamsMessage.text(str(item))\r\n",
+					"    #myTeamsMessage.send()\r\n",
+					"\r\n",
+					"else:\r\n",
+					"    exit"
+				],
+				"execution_count": 320
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"str(item)"
+				],
+				"execution_count": 329
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"values"
+				],
+				"execution_count": 62
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"item=list(values['itemname'])"
+				],
+				"execution_count": 66
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"str(item)"
+				],
+				"execution_count": 263
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#sort=db[(db[\"From\"]<= current_time) & (db[\"From\"]>=Four_hours)]\r\n",
+					"#df=sort.sort_values(['itemname'])\r\n",
+					"#df"
+				],
+				"execution_count": 55
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df['itemname'].value_counts()"
+				],
+				"execution_count": 57
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df=pd.DataFrame(df.groupby('itemname')['itemname'].count())"
+				],
+				"execution_count": 58
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df.rename(columns={'itemname':'itemanme','itemname':'count'},inplace=True)"
+				],
+				"execution_count": 60
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df.reset_index(inplace=True)"
+				],
+				"execution_count": 62
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#df.sort_values(['count'],ascending=False)"
+				],
+				"execution_count": 63
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#values=df[df['count']>=3]\r\n",
+					"#values.reset_index(inplace=True)\r\n",
+					"#values['Time']=current_time"
+				],
+				"execution_count": 67
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"values"
+				],
+				"execution_count": 68
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/UnderperformingSCB.xlsx',index_col=0)"
+				],
+				"execution_count": 69
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data"
+				],
+				"execution_count": 70
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data=data.append(values)\r\n",
+					"data.to_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/Bikaner/UnderperformingSCB.xlsx')"
+				],
+				"execution_count": 72
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data"
+				],
+				"execution_count": 301
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"item"
+				],
+				"execution_count": 156
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## **BELOW CODE IS FOR NOTIFICATIONS**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def il(x):\r\n",
+					"    print('Bikaner under performing')\r\n",
+					"    for i in x:\r\n",
+					"        \r\n",
+					""
+				],
+				"execution_count": 202
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def il2(x):\r\n",
+					"    return [i for i in x]"
+				],
+				"execution_count": 205
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"y=(il2(item))\r\n",
+					"y\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 210
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pymsteams\r\n",
+					"myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/ac6eaf82-b2d0-4b46-8e52-a17f3fc5051d@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ab1320c704ed43e88d7a1fe9b7618ee9/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"#myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/ac6eaf82-b2d0-4b46-8e52-a17f3fc5051d@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ab1320c704ed43e88d7a1fe9b7618ee9/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"myTeamsMessage.text(x)\r\n",
+					"myTeamsMessage.send()"
+				],
+				"execution_count": 64
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pymsteams\r\n",
+					"myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/ac6eaf82-b2d0-4b46-8e52-a17f3fc5051d@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ab1320c704ed43e88d7a1fe9b7618ee9/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"myTeamsMessage.text(str(two_days_set))\r\n",
+					"myTeamsMessage.send()"
+				]
+			}
+		]
+	}
+}

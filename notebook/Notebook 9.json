@@ -1,0 +1,443 @@
+{
+	"name": "Notebook 9",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sparkpool2",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "d294ded6-5c1b-432d-a7f3-2313a47877ae"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/Sparkpool2",
+				"name": "Sparkpool2",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sparkpool2",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import requests\r\n",
+					"import os\r\n",
+					"from bs4 import BeautifulSoup\r\n",
+					"import pandas as pd\r\n",
+					"import numpy as np\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"import os"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"url='https://solargis.info/ws/rest/datadelivery/request?key=MIdLrfftlFVU8AzsrEKw'\r\n",
+					"headers = {'Content-Type': 'application/xml'}"
+				],
+				"execution_count": 44
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))-timedelta(days=1)\r\n",
+					"#print(todaydate)\r\n",
+					"td=todaydate\r\n",
+					"td=str(td)\r\n",
+					"td"
+				],
+				"execution_count": 45
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"xxxx\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"27.36\" lng=\"72.14\">\r\n",
+					"       <geo:terrain elevation=\"84\" azimuth=\"0\" tilt=\"5\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''"
+				],
+				"execution_count": 46
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"request_xml"
+				],
+				"execution_count": 47
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"print(xml_file)"
+				],
+				"execution_count": 48
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"f=open(\"random2.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('random2.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('MSCEDCL')\r\n",
+					"param=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param['Date']=param['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param['Date']=param['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param['GHI_Value']=param['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param['Date']=param['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param[i]=param[i].astype(float)\r\n",
+					"x=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/SolarGIS/MSCDCL_SolarGIS1.xlsx')\r\n",
+					"x1=x.append(param)\r\n",
+					"x1.to_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/SolarGIS/MSCDCL_SolarGIS1.xlsx',index=False)\r\n",
+					"if os.path.exists(\"random2.xml\"):\r\n",
+					"    os.remove(\"random2.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 49
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"request_xml2='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"xxxx\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"8.9333373\" lng=\"77.8406698\">\r\n",
+					"       <geo:terrain elevation=\"84\" azimuth=\"0\" tilt=\"5\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''"
+				],
+				"execution_count": 52
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"request_xml2=request_xml2.replace('xxxx',str(td))\r\n",
+					"request_xml2"
+				],
+				"execution_count": 53
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml2.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file1=response.text\r\n",
+					"print(xml_file1)"
+				],
+				"execution_count": 55
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"f=open(\"random3.xml\", \"w\")\r\n",
+					"f.write(xml_file1)\r\n",
+					"with open('random3.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('Tirunelveli')\r\n",
+					"param=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param['Date']=param['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param['Date']=param['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param['GHI_Value']=param['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param['Date']=param['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param[i]=param[i].astype(float)\r\n",
+					"x=pd.read_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/SolarGIS/TN_SolarGIS1.xlsx')\r\n",
+					"x1=x.append(param)\r\n",
+					"x1.to_excel('abfss://devlop@ayanadatalake.dfs.core.windows.net/SolarGIS/TN_SolarGIS1.xlsx',index=False)\r\n",
+					"if os.path.exists(\"random3.xml\"):\r\n",
+					"    os.remove(\"random3.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					""
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,398 @@
+{
+	"name": "T3_SCB_loop1",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for DayConsolidated at Portfolio level.",
+		"folder": {
+			"name": "Ananthapur"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "e7424fd3-3b2f-40c6-a067-ebe3358a1620"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
+				"name": "sparkpool1",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**ANTPR DayConslidated Tables with Portfolio Level KPIs**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt"
+				],
+				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"#import pymsteams"
+				],
+				"execution_count": 25
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from datetime import date\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"start_date = date(2022,3,18)\r\n",
+					"days=abs(todaydate-start_date).days\r\n",
+					"days"
+				],
+				"execution_count": 26
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= days :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"#print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0\r\n",
+					"\r\n",
+					"location1 = pattoreadparquet   \r\n",
+					"DateList=DateList[::-1]\r\n",
+					"print(DateList)\r\n",
+					"#location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
+					"#print(location1)"
+				],
+				"execution_count": 27
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"for i in range(len(DateList)):\r\n",
+					"    location1= location1+ str(DateList[i])+str(\"/\")\r\n",
+					"    print(location1)\r\n",
+					"    df2=pd.read_parquet(location1)\r\n",
+					"    print(df2)\r\n",
+					"    df2.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"    df2=df2[df2[\"sitename\"]==\"ananthpuram\"]\r\n",
+					"    df2.drop([\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\",\"siteid\",\"sitename\"],axis=1,inplace=True)\r\n",
+					"    df2[\"ISTtime\"]=df2[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"    df2[\"Date\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).date\r\n",
+					"    df2[\"Time\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).time\r\n",
+					"    \r\n",
+					"    df2[\"Hour\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).hour\r\n",
+					"    df2[\"Minute\"]=pd.DatetimeIndex(df2[\"ISTtime\"]).minute\r\n",
+					"    df2=df2[(df2[\"Hour\"]>=6) & (df2[\"Hour\"]<=19)]\r\n",
+					"    print(df2)\r\n",
+					"    x2=pd.read_excel(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/Copy of OperationalTagsof SCBs (003).xlsx\",sheet_name=\"Latest\")\r\n",
+					"    wms_list=[\"ICR13..WMS.GTI_W\",\"ICR17..WMS.GTI_W\",\"ICR1..WMS.GTI_W\",\"MCR..MCR_WMS.GTI_W\",\"ICR7..WMS.GTI_W\",\r\n",
+					"         \"ICR13..WMS.AMBIENT_TEMP\",\"ICR17..WMS.AMBIENT_TEMP\",\"ICR1..WMS.AMBIENT_TEMP\",\"ICR14..WMS.AMBIENT_TEMP\",\"ICR7..WMS.AMBIENT_TEMP\",\r\n",
+					"         \"ICR13..MT1.MODULE_TEMP1\",\"ICR17..MT1.MODULE_TEMP_2\",\"ICR1..MT1.MODULE_TEMP_2\",\"ICR14..MT1.MODULE_TEMP\",\"ICR7..MT1.MODULE_TEMP_1\"]\r\n",
+					"    op_tag=x2[\"SCB\"].to_list()\r\n",
+					"    op_tag.extend(wms_list)\r\n",
+					"    df2=df2.copy()\r\n",
+					"    df2=df2[df2[\"itemname\"].isin(op_tag)]\r\n",
+					"    len(df2[\"itemname\"].unique())\r\n",
+					"    df2[\"SPP\"]=\"Antpr\"\r\n",
+					"    df2_x1=df2[df2['itemname'].str.startswith('ICR', na=True)]\r\n",
+					"    df2_x2=df2[df2['itemname'].str.startswith('MCR..MCR_WMS.GTI_W', na=True)]\r\n",
+					"    df2=pd.concat((df2_x1,df2_x2),axis=0)\r\n",
+					"    #df2_x2.head()\r\n",
+					"    df2_x1=df2[df2['itemname'].str.startswith('ICR', na=True)]\r\n",
+					"    df2_x2=df2[df2['itemname'].str.startswith('MCR..MCR_WMS.GTI_W', na=True)]\r\n",
+					"    df2=pd.concat((df2_x1,df2_x2),axis=0)\r\n",
+					"    #df2_x2.head()\r\n",
+					"    df2[\"ICR\"]=df2[\"itemname\"].apply(lambda x:x.split(\"..\")[0])\r\n",
+					"    df2[\"INV\"]=df2[\"itemname\"].apply(lambda x:x.split(\"..\")[1].split('.')[0])\r\n",
+					"    df2[\"SCB\"]=df2[\"itemname\"].apply(lambda x:x.split(\"..\")[1].split('.')[1])\r\n",
+					"    Blocklist=[]\r\n",
+					"    for i in range(len(df2)):\r\n",
+					"        if df2.iloc[i,1].split(\"..\")[0] in [\"ICR8\",\"ICR10\",\"ICR12\",\"ICR13\"]:\r\n",
+					"            Blocklist.append(\"Ananthapur1\")\r\n",
+					"        elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR16\",\"ICR17\",\"ICR18\",\"ICR19\"]:\r\n",
+					"            Blocklist.append(\"Ananthapur2\")\r\n",
+					"        elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR1\",\"ICR2\",\"ICR3\",\"ICR4\"]:\r\n",
+					"            Blocklist.append(\"Ananthapur3\")\r\n",
+					"        elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR11\",\"ICR14\",\"ICR15\",\"ICR20\",\"MCR\"]:\r\n",
+					"            Blocklist.append(\"Ananthapur4\")\r\n",
+					"        elif df2.iloc[i,1].split(\"..\")[0] in [\"ICR5\",\"ICR6\",\"ICR7\",\"ICR9\"]:\r\n",
+					"            Blocklist.append(\"Ananthapur5\")\r\n",
+					"    df2[\"Block\"]=Blocklist\r\n",
+					"    def grouped_min(value):\r\n",
+					"        if value in range(0,5):\r\n",
+					"            return 4\r\n",
+					"        elif value in range(6,10):\r\n",
+					"            return 9\r\n",
+					"        elif value in range(11,15):\r\n",
+					"            return 14\r\n",
+					"        elif value in range(16,20):\r\n",
+					"            return 19\r\n",
+					"        elif value in range(21,25):\r\n",
+					"            return 24\r\n",
+					"        elif value in range(26,30):\r\n",
+					"            return 29\r\n",
+					"        elif value in range(31,35):\r\n",
+					"            return 34\r\n",
+					"        elif value in range(36,40):\r\n",
+					"            return 39\r\n",
+					"        elif value in range(41,45):\r\n",
+					"            return 44\r\n",
+					"        elif value in range(46,50):\r\n",
+					"            return 49\r\n",
+					"        elif value in range(51,55):\r\n",
+					"            return 54\r\n",
+					"        elif value in range(56,59):\r\n",
+					"            return 59\r\n",
+					"    df2[\"grouped_min\"]=df2[\"Minute\"].apply(grouped_min)\r\n",
+					"    df2c=df2.groupby(by=[\"itemname\",\"Hour\",\"grouped_min\"]).agg(\"max\").reset_index()\r\n",
+					"    df2c=df2c.set_index(\"Date\")\r\n",
+					"    df2c.drop(\"ISTtime\",inplace=True,axis=1)\r\n",
+					"    df2c=df2c[[\"Time\",\"Hour\",\"Minute\",\"grouped_min\",\"SPP\",\"Block\",\"ICR\",\"INV\",\"SCB\",\"itemname\",\"value\"]]\r\n",
+					"    df2c.head()\r\n",
+					"    ICR_dict={\"ICR1\":\"ICR01\",\r\n",
+					"         \"ICR2\":\"ICR02\",\r\n",
+					"         \"ICR3\":\"ICR03\",\r\n",
+					"         \"ICR4\":\"ICR04\",\r\n",
+					"         \"ICR5\":\"ICR05\",\r\n",
+					"         \"ICR6\":\"ICR06\",\r\n",
+					"         \"ICR7\":\"ICR07\",\r\n",
+					"         \"ICR8\":\"ICR08\",\r\n",
+					"         \"ICR9\":\"ICR09\"}\r\n",
+					"    df2c[\"ICR\"].replace(ICR_dict,inplace=True)\r\n",
+					"    df2c.to_excel(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/TABLE3_FINAL1.xlsx\")\r\n",
+					"    df2c=df2c.reset_index()\r\n",
+					"    df=df2c.copy()\r\n",
+					"    df_final=df.copy()\r\n",
+					"    df_final=df_final[df_final[\"itemname\"].isin(op_tag)]\r\n",
+					"    x1=pd.crosstab(index=[df[\"Block\"],df[\"Date\"],df[\"Hour\"],df[\"grouped_min\"]],columns=df[\"itemname\"],values=df[\"value\"],aggfunc=np.mean)\r\n",
+					"    x1=x1.reset_index()\r\n",
+					"    ml5=['Block', 'Date', 'Hour', 'grouped_min', 'ICR13..WMS.GTI_W', 'ICR17..WMS.GTI_W', 'ICR1..WMS.GTI_W','MCR..MCR_WMS.GTI_W','ICR7..WMS.GTI_W',\r\n",
+					"    \"ICR13..WMS.AMBIENT_TEMP\",\"ICR17..WMS.AMBIENT_TEMP\",\"ICR1..WMS.AMBIENT_TEMP\",\"ICR7..WMS.AMBIENT_TEMP\",\r\n",
+					"         \"ICR13..MT1.MODULE_TEMP1\",\"ICR17..MT1.MODULE_TEMP_2\",\"ICR1..MT1.MODULE_TEMP_2\",\"ICR14..MT1.MODULE_TEMP\",\"ICR7..MT1.MODULE_TEMP_1\"]\r\n",
+					"    print(ml5)\r\n",
+					"    x11=x1[ml5]\r\n",
+					"    x11.head()\r\n",
+					"    x1.drop(ml5,axis=1,inplace=True)\r\n",
+					"    x1.head()\r\n",
+					"    print(x1.shape)\r\n",
+					"    print(x11.shape)\r\n",
+					"    dfc3_1=pd.concat((x11,x1),axis=1)\r\n",
+					"    dfc3_1.head()\r\n",
+					"    def block_dataframe(x1,*block_no):\r\n",
+					"        for i in block_no:\r\n",
+					"            if i==4:\r\n",
+					"                Ambient_temp=x1[x1[\"Block\"]==\"Ananthapur2\"][[\"ICR17..WMS.AMBIENT_TEMP\"]]\r\n",
+					"                df_block=x1[x1[\"Block\"]==\"Ananthapur\"+str(i)]\r\n",
+					"                \r\n",
+					"                df_block.dropna(axis=1,inplace=True)\r\n",
+					"                df_block[\"ICR17..WMS.AMBIENT_TEMP\"]=Ambient_temp\r\n",
+					"                ml5=['Block', 'Date', 'Hour', 'grouped_min','MCR..MCR_WMS.GTI_W',\"ICR17..WMS.AMBIENT_TEMP\",\"ICR14..MT1.MODULE_TEMP\"]\r\n",
+					"                x11=df_block[ml5]\r\n",
+					"                df_block.drop(ml5,axis=1,inplace=True)\r\n",
+					"                table_name=\"test.\"+\"Scb_block\"+str(i)\r\n",
+					"                dfsp=spark.createDataFrame(df_block)\r\n",
+					"                spark.sql(\"create database if not exists test\")\r\n",
+					"                dfsp.write.format(\"delta\").mode(\"append\").saveAsTable(table_name)\r\n",
+					"            else:\r\n",
+					"                \r\n",
+					"                df_block=x1[x1[\"Block\"]==\"Ananthapur\"+str(i)]\r\n",
+					"                df_block.dropna(axis=1,inplace=True)\r\n",
+					"\r\n",
+					"                table_name=\"test.\"+\"Scb_block\"+str(i)\r\n",
+					"                dfsp=spark.createDataFrame(df_block)\r\n",
+					"                spark.sql(\"create database if not exists test\")\r\n",
+					"                dfsp.write.format(\"delta\").mode(\"append\").saveAsTable(table_name)\r\n",
+					"    location1=\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\"            \r\n",
+					"    block_tuple=(1,2,3,4,5)\r\n",
+					"    block_dataframe(dfc3_1,*block_tuple)\r\n",
+					"    #location1=\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\""
+				],
+				"execution_count": 28
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**USE BELOW BLOCK IF MANUAL OPERATION IS REQUIRED ANYTIME**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

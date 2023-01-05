@@ -1,0 +1,442 @@
+{
+	"name": "Untitled6",
+	"properties": {
+		"folder": {
+			"name": "DC_Cable_Loss"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "5bde01dc-d970-44f4-beab-3df8f358c150"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
+				"name": "sparkpool1",
+				"type": "Spark",
+				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd \n",
+					"import datetime\n",
+					"import numpy as np\n",
+					"import matplotlib.pyplot as plt\n",
+					"from pyspark.sql import SparkSession\n",
+					"from pyspark.sql.types import *\n",
+					"import pyspark.sql.functions as sf\n",
+					"from datetime import datetime \n",
+					"from datetime import date \n",
+					"from datetime import timedelta\n",
+					"# from pyspark.sql.functions import to_date\n",
+					"from datetime import time\n",
+					"import pytz\n",
+					"from pathlib import Path\n",
+					"#import pymsteams"
+				],
+				"execution_count": 96
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://ayanasmbcurrent@ayanadatalake.dfs.core.windows.net/AyanaSMBCurrent/\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 97
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]"
+				],
+				"execution_count": 98
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadparquet   \r\n",
+					"location1= location1+ str(DateList[DateLoopCounter]).split(\"-\")[0]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[1]+\"/\"+str(DateList[DateLoopCounter]).split(\"-\")[2]+\"/*\"\r\n",
+					"print(location1)"
+				],
+				"execution_count": 99
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data1 = pd.read_csv(location1,parse_dates=[\"dateTime\"])\n",
+					"data1=data1[[ 'current1',\n",
+					"       'current2', 'current3', 'current4', 'current5', 'current6', 'current7',\n",
+					"       'current8', 'current9', 'current10', 'current11', 'current12',\n",
+					"       'current13', 'current14', 'current15', 'current16',\n",
+					"       'dateTime']]\n",
+					"data1[\"Datetime\"]=data1[\"dateTime\"].apply(lambda x:\":\".join(x.split(\":\")[:3]))\n",
+					"data1['Datetime'] =data1[\"Datetime\"].astype(\"datetime64[ns]\")\n",
+					"data1=data1[(data1[\"Datetime\"]>=\"2022-05-22 5:00:00\") & (data1[\"Datetime\"]<=\"2022-05-22 23:45:00\")]\n",
+					"data1.set_index(\"Datetime\",inplace=True)\n",
+					"data1"
+				],
+				"execution_count": 100
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data1[\"Total_Current\"]=data1.sum(axis=1)\n",
+					"data1"
+				],
+				"execution_count": 101
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#data_24=data1[(data1.index>=\"2022-04-24 00:00:00\") & (data1.index<=\"2022-04-24 23:59:59\")  ]\n",
+					"#data_24=data_24[[\"Total_Current\"]]\n",
+					"data1=pd.DataFrame(data1[\"Total_Current\"].resample('5min').mean())\n",
+					"data1.reset_index(inplace=True)\n",
+					"#data1.to_csv(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/DC_Cable/input_current_dt_10.csv\")"
+				],
+				"execution_count": 102
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data1"
+				],
+				"execution_count": 103
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 125
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadparquet   \r\n",
+					"location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
+					"print(location1)"
+				],
+				"execution_count": 126
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data2=pd.read_parquet(location1)\r\n",
+					"#data2.drop(\"Unnamed: 0\",axis=1,inplace=True)\r\n",
+					"data2.columns"
+				],
+				"execution_count": 127
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data2=pd.read_parquet(location1)\n",
+					"#data2.drop(\"Unnamed: 0\",axis=1,inplace=True)\n",
+					"data2.columns\n",
+					"data2=data2[data2[\"itemname\"]==\"ICR15..INV1.SCB_19\"][[\"ISTtime\",\"itemname\",\"value\"]]\n",
+					"data2=data2[(data2[\"ISTtime\"]>=\"2022-05-22 05:30:00.000\") & (data2[\"ISTtime\"]<=\"2022-05-22 19:45:00.000\")]\n",
+					"#data2.to_csv(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/DC_Cable/output_current_dt_10.csv\")\n",
+					""
+				],
+				"execution_count": 145
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data2"
+				],
+				"execution_count": 146
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data2.set_index(\"ISTtime\",inplace=True)"
+				],
+				"execution_count": 147
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data2=pd.DataFrame(data2[\"value\"].resample('5min').mean())\n",
+					"#x2.reset_index(inplace=True)\n",
+					"data2\n",
+					"data2.to_csv(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/DC_Cable/output_current_dt_10.csv\")"
+				],
+				"execution_count": 148
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"data2"
+				],
+				"execution_count": 149
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"input_current=data1[\"Total_Current\"].sum()\r\n",
+					"input_current\r\n",
+					""
+				],
+				"execution_count": 150
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"output_current=data2[\"value\"].sum()\r\n",
+					"output_current\r\n",
+					""
+				],
+				"execution_count": 151
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"((output_current-input_current)/input_current)*100"
+				],
+				"execution_count": 61
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"final[\"DC_Cable_Loss\"]=((final[\"value\"]-final[\"Total_Current\"])/(final[\"Total_Current\"]))*100\n",
+					"final.dropna(inplace=True)\n",
+					"final"
+				],
+				"execution_count": 46
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"final.describe()"
+				],
+				"execution_count": 50
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"plt.rcParams['figure.figsize']=[10,10]\n",
+					"import seaborn as sns\n",
+					"sns.boxplot(data=final,y=\"DC_Cable_Loss\")"
+				],
+				"execution_count": 49
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "-- This Script can be used to validate data of any tag in daily parquet file \n\nSELECT * FROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/repono/allcsvtoparquet/dt=2022-02-19/*',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE [itemname] = 'ICR6..INV3.kW'\norder by [ISTtime] ASC",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
