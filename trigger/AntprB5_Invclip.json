@@ -1,0 +1,32 @@
+{
+	"name": "AntprB5_Invclip",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "AntprB5_Invclip",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-04-28T07:18:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						35
+					],
+					"hours": [
+						4
+					]
+				}
+			}
+		}
+	}
+}

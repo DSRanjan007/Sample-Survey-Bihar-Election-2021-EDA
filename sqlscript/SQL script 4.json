@@ -2,12 +2,12 @@
 	"name": "SQL script 4",
 	"properties": {
 		"content": {
-			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/phelanrealtime/phelan_realtime/2022/04/08/-1493444302_94d639ea0b034dec8b9bc2cc7d7c6654_1.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\n",
+			"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'repono_ayanadatalake_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [repono_ayanadatalake_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://repono@ayanadatalake.dfs.core.windows.net' \n\t)\nGO\n\nCREATE EXTERNAL TABLE Inverter_Table2 (\n\t[Date] nvarchar(4000),\n\t[SPP] nvarchar(4000),\n\t[Block] nvarchar(4000),\n\t[ICR] nvarchar(4000),\n\t[Inv] nvarchar(4000),\n\t[InvDCLoad] float,\n\t[Inverter_OEM] nvarchar(4000),\n\t[Module_OEM] nvarchar(4000),\n\t[ModuleWattage] bigint,\n\t[InvEnergy_kWh] nvarchar(4000),\n\t[InverterEfficiency] nvarchar(4000),\n\t[PeakACPower] nvarchar(4000),\n\t[PeakDCPower] nvarchar(4000)\n\t)\n\tWITH (\n\tLOCATION = 'synapse/workspaces/sapience/warehouse/phelan.db/inverter_table2',\n\tDATA_SOURCE = [repono_ayanadatalake_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.Inverter_Table2\nGO",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
+				"databaseName": "phelan",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000

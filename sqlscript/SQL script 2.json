@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"content": {
+			"query": "SELECT   [Date]\n,[itemname]\n,[Inv]\n,[InvEnergy]\n,[InvDowntime]\n,[InvWakeUp]\n,[InvSleep]\n,[InvOperationMinutes]\n,[InvRunningMinutes]\n,[InvAvgEff]\n,[InvMaxEff]\n,[InvEnergyLoss]\n FROM [dbo].[invperformance]\n --where itemname = 'ICR16..INV3.TODAY_GEN'\n order by 1 desc\n ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "reanalytics",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

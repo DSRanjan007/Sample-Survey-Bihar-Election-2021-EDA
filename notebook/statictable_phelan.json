@@ -1,0 +1,190 @@
+{
+	"name": "statictable_phelan",
+	"properties": {
+		"folder": {
+			"name": "Phelan"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sapientia",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "4",
+				"spark.autotune.trackingId": "a4689869-b196-462b-88cf-1cc4a1dc89d3"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/Sapientia",
+				"name": "Sapientia",
+				"type": "Spark",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sapientia",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"import pymsteams"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Tags = pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_StaticData_PowerBI/Bhdl_PVSyst.csv\",Tags_Phelan.csv\", encoding = 'Latin1')\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(Tags)\r\n",
+					"spark.sql(\"create database if not exists phelan\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"phelan.TAGS\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv = pd.read_excel(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_StaticData_PowerBI/Bhdl_Inverter.xlsx\")\r\n",
+					"inv.dropna(axis=1,inplace=True)\r\n",
+					"inv=inv.iloc[:,1:]\r\n",
+					"print(inv)\r\n",
+					"df_spark = spark.createDataFrame(inv)\r\n",
+					"spark.sql(\"create database if not exists phelan\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"phelan.Inverter_TABLE2\")"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"drop table phelan.Inverter_TABLE2\")"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pvsyst = pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_StaticData_PowerBI/Bhdl_PVSyst.csv\")\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(pvsyst)\r\n",
+					"spark.sql(\"create database if not exists phelan\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"phelan.PVSystData\")"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"phstaticloss = pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_StaticData_PowerBI/Bhdl_PhLoss.csv\")\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(phstaticloss)\r\n",
+					"spark.sql(\"create database if not exists phelan\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"phelan.phstaticloss\")"
+				],
+				"execution_count": 2
+			}
+		]
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"name": "multipurpose",
+	"properties": {
+		"description": "This SQL script is a general purpose script to find desired outputs ",
+		"content": {
+			"query": "-- This Script can be used to validate data of any tag in daily parquet file \nSELECT * FROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/repono/allcsvtoparquet/dt=2022-06-24/*',\n        FORMAT = 'PARQUET'\n    ) AS [result]\nWHERE [itemname] = 'ICR17..INV2.kW' AND [ISTtime] >= '2022-06-24'\nORDER BY [ISTtime] ASC;\n-- Group by [itemname]\n\n-------------------------------------------------------------------------------------------------------------------------------------------\n\n-- TODAY's DATA VISUALIZATION/CHECK OF ANANTHPURAMU TAGS IN CSV FILES\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/ayanaananthpuramrealtime/ananthapuram_realtime_tags/2022/07/22/*',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\nWHERE [C3] = 'MCR..B5_OG1_TVM.TOTAL_IMPORT_POWER_MWh_RAW' AND [C2] >= '2022-07-22'\nORDER BY [C2] ASC;\n\n\n-- TODAY's DATA VISUALIZATION/CHECK OF BIKANER TAGS IN CSV FILES\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/bikanerrealtime/bikaner_realtime_4847/2022/07/16/**',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\nWHERE [C3] = 'ICR16.INV3_DATA.INVERTER3.STRING_CURRENT3' AND [C2] >= '2022-07-16'\nORDER BY [C2] ASC;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

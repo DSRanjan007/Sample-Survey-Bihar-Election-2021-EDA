@@ -1,0 +1,1090 @@
+{
+	"name": "invertertable_notification_Copy1",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for Inverters' Performance.",
+		"folder": {
+			"name": "Antpr"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sapdevpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "5067b5c0-2f22-4b94-afd1-dd0dfb158f84"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/Sapdevpool1",
+				"name": "Sapdevpool1",
+				"type": "Spark",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sapdevpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**INVERTER TABLE WITH VARIOUS DAY-LEVEL FEATURES LIKE: Energy, SpY, Donwtime, Wake-UpTime, SleepTime, EnergyLost, Efficiency**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"import pymsteams\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings(\"ignore\")"
+				],
+				"execution_count": 104
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from datetime import datetime\r\n",
+					"import pytz\r\n",
+					"\r\n",
+					"tz_india = pytz.timezone('Asia/Kolkata') \r\n",
+					"datetime_Now = datetime.now(tz_india)\r\n",
+					"print(\"NY time:\", datetime_Now.strftime('%Y-%m-%d %H:%M:%S.%f'))\r\n",
+					"before_time=(datetime.now(tz_india)-timedelta(minutes=40)) # change time detla according to frequency of alert\r\n",
+					"before_time.strftime('%Y-%m-%d %H:%M:%S.%f')"
+				],
+				"execution_count": 105
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pathtoreadcsv = \"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime/\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 106
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1=\"abfss://bikanerrealtime@ayanadatalake.dfs.core.windows.net/bikaner_realtime/2022/09/01/*\""
+				],
+				"execution_count": 107
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#location1 = pathtoreadcsv  \r\n",
+					"#location1= location1+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location1)\r\n",
+					"df=  spark.read.load(location1, format='csv', header=True)\r\n",
+					"#df=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/07/04/*\", format='csv', header=True,infer_schema=True)\r\n",
+					"#df = spark.read.load(location1, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df=df.toPandas()\r\n",
+					"df_scb=df.copy()\r\n",
+					"df\r\n",
+					"#df = pd.read_parquet(location1)"
+				],
+				"execution_count": 108
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location_input=\"abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/\"\r\n",
+					"#location_output=\"abfss://repono@ayanadatalake.dfs.core.windows.net/inverterPerf/\"\r\n",
+					"#df = pd.read_parquet(location1)\r\n",
+					"#df = pd.read_parquet(\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=2022-05-16/\") #USE THIS LIKE FOR RUNNING FOR ANYPARTICULAR DAY"
+				],
+				"execution_count": 109
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd\r\n",
+					"import numpy as np\r\n",
+					"#df=pd.read_parquet(\"Bkn_2022-07-21.parquet\")\r\n",
+					"df.head()"
+				],
+				"execution_count": 110
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.sort_values(by=\"timestamp\",ascending=True,inplace=True)\r\n",
+					"df.sort_values(by=\"timestamp\",ascending=True,inplace=True)\r\n",
+					"#df=df[df[\"sitename\"]==\"ananthpuram\"]\r\n",
+					"df.drop([\"deviceid\",\"quality\",\"ISTtime\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],axis=1,inplace=True)\r\n",
+					"df[\"timestamp\"]=df[\"timestamp\"].astype(\"datetime64[ns]\")\r\n",
+					"df[\"value\"]=df[\"value\"].astype(\"float64\")\r\n",
+					"df[\"Date\"]=pd.DatetimeIndex(df[\"timestamp\"]).date\r\n",
+					"df[\"Time\"]=pd.DatetimeIndex(df[\"timestamp\"]).time\r\n",
+					"df[\"Hour\"]=pd.DatetimeIndex(df[\"timestamp\"]).hour\r\n",
+					"df[\"Minute\"]=pd.DatetimeIndex(df[\"timestamp\"]).minute\r\n",
+					"#df[\"ISTtime\"]>datetime\r\n",
+					"df_scb=df.copy()"
+				],
+				"execution_count": 111
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"current_time=datetime_Now.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"print(current_time)"
+				],
+				"execution_count": 112
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"before_time=before_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"before_time"
+				],
+				"execution_count": 113
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"five_min_before_time=(datetime.now(tz_india)-timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S.%f') # change time detla according to frequency of alert\r\n",
+					"#before_time.strftime('%Y-%m-%d %H:%M:%S.%f')"
+				],
+				"execution_count": 114
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.head()"
+				],
+				"execution_count": 115
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df=df[[\"timestamp\",\"itemname\",\"value\",\"Date\",\"Time\",\"Hour\",\"Minute\"]]\r\n",
+					"df.rename(columns={\"timestamp\":\"ISTtime\"},inplace=True)"
+				],
+				"execution_count": 116
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df"
+				],
+				"execution_count": 117
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df=df[(df[\"ISTtime\"]<=str(current_time)) & (df[\"ISTtime\"]>=str(before_time))]\r\n",
+					"df"
+				],
+				"execution_count": 118
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df1=df.copy()\r\n",
+					"df2=df.copy()"
+				],
+				"execution_count": 119
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**BELOW SET OF CODE IS TO GENERATE ALERTS ON LOWEST PERFORMING INVERTERS IN LAST TWO DAYS**"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**EDITING ANYTHING IN TABLES MANUALLY**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_scb=df_scb[[\"timestamp\",\"itemname\",\"value\",\"Date\",\"Time\",\"Hour\",\"Minute\"]]\r\n",
+					"df_scb.rename(columns={\"timestamp\":\"ISTtime\"},inplace=True)"
+				],
+				"execution_count": 120
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_scb=df_scb[(df_scb[\"ISTtime\"]<=str(current_time)) & (df_scb[\"ISTtime\"]>=str(five_min_before_time))]\r\n",
+					"df_scb"
+				],
+				"execution_count": 121
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"scb_static_file=pd.read_excel(\"abfss://nucleus@ayanadatalake.dfs.core.windows.net/Static_Files/Bikaner_SCB_Tags.xlsx\")\r\n",
+					"#scb_static_file=scb_static_file[\"Tagname\"]\r\n",
+					"scb_static_file=list(scb_static_file[\"Tagename\"])[0:1922]\r\n",
+					"#scb_static_file.shape\r\n",
+					"#len(scb_static_file.shape)"
+				],
+				"execution_count": 122
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"scb_static_file"
+				],
+				"execution_count": 123
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_scb=df_scb[df_scb[\"itemname\"].isin(scb_static_file)]\r\n",
+					"ml1=df_scb[\"itemname\"].unique()\r\n",
+					"ml1\r\n",
+					"print(len(ml1))"
+				],
+				"execution_count": 125
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"scb_static_file"
+				],
+				"execution_count": 126
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"ml2=[i for i in scb_static_file if i not in ml1]\r\n",
+					"print(len(ml2))\r\n",
+					"df_tags=pd.DataFrame(ml2).to_excel(\"abfss://nucleus@ayanadatalake.dfs.core.windows.net/Static_Files/Bikaner_SCB_Tags1.xlsx\")"
+				],
+				"execution_count": 127
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"all_scb=df_scb.groupby(\"itemname\")[\"value\"].agg(\"sum\").reset_index()\r\n",
+					"all_faulty_scb=all_scb[all_scb[\"value\"]==0]\r\n",
+					"faulty_scb_list=all_faulty_scb[\"itemname\"].to_list()\r\n",
+					"faulty_scb_list"
+				],
+				"execution_count": 128
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"static_antpr_scb=pd.read_excel(\"abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/AntprScb.xlsx\")\r\n",
+					"static_antpr_scb"
+				],
+				"execution_count": 76
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"faulty_scb_list=static_antpr_scb[static_antpr_scb[\"tagname\"].isin(faulty_scb_list)][\"SCBNameinField\"].to_list()\r\n",
+					"faulty_scb_list"
+				],
+				"execution_count": 77
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#faulty_scb_list.append(\"A\")\r\n",
+					"faulty_scb_list"
+				],
+				"execution_count": 78
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"drop table reassets.scb_alerts\")"
+				],
+				"execution_count": 49
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"columns=[\"Tagname\"]\r\n",
+					"df_scb=pd.DataFrame(faulty_scb_list,columns=columns)\r\n",
+					"df_scb\r\n",
+					"from pyspark.sql.types import StructType,StructField,StringType,DateType,FloatType,LongType,DoubleType\r\n",
+					"schema=StructType([\r\n",
+					"                    \r\n",
+					"                    StructField(\"itemname\",StringType()),\r\n",
+					"])\r\n",
+					"df_spark2=spark.createDataFrame(df_scb,schema=schema)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"overwrite\").saveAsTable(\"reassets.scb_alerts\")"
+				],
+				"execution_count": 50
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"if len(faulty_scb_list)>0:\r\n",
+					"    import pymsteams\r\n",
+					"    myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/c5319b3c-6028-485d-b781-f8e7d0ade630@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/770ac72ba0bf449890c27f8b096533cd/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"    myTeamsMessage.text(str(faulty_scb_list))  \r\n",
+					"    myTeamsMessage.send()"
+				],
+				"execution_count": 51
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from datetime import datetime\r\n",
+					"import pytz\r\n",
+					"\r\n",
+					"tz_india = pytz.timezone('Asia/Kolkata') \r\n",
+					"datetime_Now = datetime.now(tz_india)\r\n",
+					"print(\"NY time:\", datetime_Now.strftime('%Y-%m-%d %H:%M:%S.%f'))\r\n",
+					"before_time=(datetime.now(tz_india)-timedelta(minutes=30)) # change time detla according to frequency of alert\r\n",
+					"before_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"\r\n",
+					"pathtoreadcsv = \"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0\r\n",
+					"\r\n",
+					"location1 = pathtoreadcsv  \r\n",
+					"location1= location1+ str(todaydate).split(\"-\")[0]+\"/\"+str(todaydate).split(\"-\")[1]+\"/\"+str(todaydate).split(\"-\")[2]+\"/\"+str(\"*\")\r\n",
+					"print(location1)\r\n",
+					"df=  spark.read.load(location1, format='csv', header=True)\r\n",
+					"#df=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/07/04/*\", format='csv', header=True,infer_schema=True)\r\n",
+					"#df = spark.read.load(location1, format='csv', header=True)\r\n",
+					"#display(df)\r\n",
+					"df=df.toPandas()\r\n",
+					"df_scb=df.copy()\r\n",
+					"df\r\n",
+					"#df = pd.read_parquet(location1)\r\n",
+					"\r\n",
+					"#spark.sql(\"drop table phelan.invperformance\")\r\n",
+					"\r\n",
+					"df.drop(columns=[\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],inplace=True)\r\n",
+					"\r\n",
+					"location_input=\"abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/\"\r\n",
+					"\r\n",
+					"df.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"df.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
+					"#df=df[df[\"sitename\"]==\"ananthpuram\"]\r\n",
+					"#df.drop([\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],axis=1,inplace=True)\r\n",
+					"df[\"ISTtime\"]=df[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"df[\"Date\"]=pd.DatetimeIndex(df[\"ISTtime\"]).date\r\n",
+					"df[\"Date\"]=df[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"df[\"Time\"]=pd.DatetimeIndex(df[\"ISTtime\"]).time\r\n",
+					"df[\"Hour\"]=pd.DatetimeIndex(df[\"ISTtime\"]).hour\r\n",
+					"df[\"Minute\"]=pd.DatetimeIndex(df[\"ISTtime\"]).minute\r\n",
+					"df[\"value\"]=df[\"value\"].astype(\"float64\")\r\n",
+					"print(df.dtypes)\r\n",
+					"Radiation_Block1=df[(df['itemname']==\"WMS_GII\") & (df[\"Date\"]==str(df[\"Date\"].mode()[0]).split(\" \")[0]) &  (df['value']>=2) & (df[\"Hour\"]>=6) & (df[\"Hour\"]<20)]\r\n",
+					"Radiation_Block1=Radiation_Block1[[\"ISTtime\",\"itemname\",\"value\"]]\r\n",
+					"Radiation_Block1[\"ISTtime\"]=Radiation_Block1[\"ISTtime\"].astype(\"datetime64[ns]\")\r\n",
+					"Radiation_Block1[\"Hour\"]=pd.DatetimeIndex(Radiation_Block1[\"ISTtime\"]).hour\r\n",
+					"Radiation_Block1[\"Minute\"]=pd.DatetimeIndex(Radiation_Block1[\"ISTtime\"]).minute\r\n",
+					"Data_To=str(Radiation_Block1[\"ISTtime\"].head(1).iloc[0])\r\n",
+					"print(Data_To)\r\n",
+					"Data_From=str(Radiation_Block1[\"ISTtime\"].tail(1).iloc[0])\r\n",
+					"print(Data_From)\r\n",
+					"df=df[(df[\"ISTtime\"]>=Data_To) & (df[\"ISTtime\"]<=Data_From)]\r\n",
+					"#df=df[ (df[\"Hour\"]>=6) & (df[\"Hour\"]<=19)]\r\n",
+					"#df=df[ (df[\"Hour\"]>=Up_Hour) & (df[\"Hour\"]<=Sleep_Hour) & (df[\"Minute\"]>=Up_Minute) & (df[\"Minute\"]<=Sleep_Minute)]\r\n",
+					"df=df.drop_duplicates()\r\n",
+					"df[\"value\"]=df[\"value\"].astype(\"float32\")\r\n",
+					"Up_Hour=df[(df[\"itemname\"]==\"WMS_GII\") & (df[\"value\"]>=2) ].head(1)[\"Hour\"].iloc[0]\r\n",
+					"Sleep_Hour=df[(df[\"itemname\"]==\"WMS_GII\") & (df[\"value\"]>=2) ].tail(1)[\"Hour\"].iloc[0]\r\n",
+					"Up_Minute=df[(df[\"itemname\"]==\"WMS_GII\") & (df[\"value\"]>=2) ].head(1)[\"Minute\"].iloc[0]\r\n",
+					"Sleep_Minute=df[(df[\"itemname\"]==\"WMS_GII\") & (df[\"value\"]>=2) ].tail(1)[\"Minute\"].iloc[0]\r\n",
+					"#df.to_excel(\"abfss://devlop@ayanadatalake.dfs.core.windows.net/Phelan.xlsx\")\r\n",
+					"current_time=datetime_Now.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"print(current_time)\r\n",
+					"before_time=before_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"before_time\r\n",
+					"five_min_before_time=five_min_before_time=(datetime.now(tz_india)-timedelta(minutes=8)).strftime('%Y-%m-%d %H:%M:%S.%f') # change time detla according to frequency of alert\r\n",
+					"#before_time.strftime('%Y-%m-%d %H:%M:%S.%f')\r\n",
+					"\r\n",
+					"df=df[(df[\"ISTtime\"]<=str(current_time)) & (df[\"ISTtime\"]>=str(before_time))]\r\n",
+					"df\r\n",
+					"\r\n",
+					"df_scb=df.copy()\r\n",
+					"df1=df.copy()\r\n",
+					"df2=df.copy()\r\n",
+					"\r\n",
+					"Radiation_Block1\r\n",
+					"\r\n",
+					"df[\"SPP\"]=\"Phelan\"\r\n",
+					"df=df[df['itemname'].str.startswith('ITC', na=True)]\r\n",
+					"df=df[df['itemname'].str.contains('TODAY_KWH', na=True)]\r\n",
+					"df = df[~df[\"itemname\"].str.contains('MFM_', na=True)]\r\n",
+					"df = df[~df[\"itemname\"].str.contains('MOD', na=True)]\r\n",
+					"inv_current_list=list(df[\"itemname\"].unique())\r\n",
+					"inv_current_list"
+				],
+				"execution_count": 52
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Block1_list=['ITC1_INV1_TODAY_KWH',\r\n",
+					" 'ITC3_INV1_TODAY_KWH',\r\n",
+					" 'ITC4_INV1_TODAY_KWH',\r\n",
+					" 'ITC2_INV1_TODAY_KWH',\r\n",
+					" 'ITC1_INV2_TODAY_KWH',\r\n",
+					" 'ITC3_INV2_TODAY_KWH',\r\n",
+					" 'ITC4_INV2_TODAY_KWH',\r\n",
+					" 'ITC2_INV2_TODAY_KWH',\r\n",
+					" 'ITC3_INV3_TODAY_KWH',\r\n",
+					" 'ITC1_INV3_TODAY_KWH',\r\n",
+					" 'ITC4_INV3_TODAY_KWH',\r\n",
+					" 'ITC2_INV3_TODAY_KWH',\r\n",
+					" 'ITC3_INV4_TODAY_KWH',\r\n",
+					" 'ITC1_INV4_TODAY_KWH',\r\n",
+					" 'ITC2_INV4_TODAY_KWH',\r\n",
+					" 'ITC4_INV4_TODAY_KWH']"
+				],
+				"execution_count": 242
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"list_of_down_inv=[ i for i in Block1_list if i not in inv_current_list ]\r\n",
+					"list_of_down_inv"
+				],
+				"execution_count": 243
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"if len(list_of_down_inv)>0:\r\n",
+					"    import pymsteams\r\n",
+					"    myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/17435f69-7867-4a41-b5f0-46ceb0fb534f@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ae70209452044d1bb0c5a07451e8c1d6/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"    myTeamsMessage.text(str(list_of_down_inv))  \r\n",
+					"    myTeamsMessage.send()"
+				],
+				"execution_count": 244
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"static_file_phelan_scb=pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Phelan/Phelan_StaticFolder/Phelan-B50MW_SMB.csv\")\r\n",
+					"static_file_phelan_scb=static_file_phelan_scb.iloc[:,[-1,-2]]\r\n",
+					"static_file_phelan_scb\r\n",
+					"all_scb_phelan=static_file_phelan_scb.iloc[:,1].to_list()\r\n",
+					"#all_scb_phelan\r\n",
+					"static_file_phelan_scb"
+				],
+				"execution_count": 245
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_scb=df_scb[df_scb[\"itemname\"].isin(all_scb_phelan)]\r\n",
+					"all_current_scb=df_scb[\"itemname\"].unique()"
+				],
+				"execution_count": 246
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"all_faulty_scb=[i for i in all_scb_phelan if i not in all_current_scb]\r\n",
+					"all_faulty_scb "
+				],
+				"execution_count": 247
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"all_faulty_scb=static_file_phelan_scb[static_file_phelan_scb[\"Tags\"].isin(all_faulty_scb)][\"FieldSCBName\"].to_list()\r\n",
+					"all_faulty_scb"
+				],
+				"execution_count": 248
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"if len(all_faulty_scb)>0:\r\n",
+					"    import pymsteams\r\n",
+					"    myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/17435f69-7867-4a41-b5f0-46ceb0fb534f@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/19055c30617f4357bd1a8b1ce130cde7/0a64ab19-2984-4746-9447-21882231bb32\")\r\n",
+					"    myTeamsMessage.text(str(all_faulty_scb))  \r\n",
+					"    myTeamsMessage.send()"
+				],
+				"execution_count": 249
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

@@ -3,12 +3,12 @@
 	"properties": {
 		"description": "This codes is to read all the daily csv files that are being created in ADLS into parquet format at the desired location",
 		"folder": {
-			"name": "phelan"
+			"name": "Antpr"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
 		"bigDataPool": {
-			"referenceName": "sparkpool1",
+			"referenceName": "sapient",
 			"type": "BigDataPoolReference"
 		},
 		"sessionProperties": {
@@ -16,13 +16,13 @@
 			"driverCores": 8,
 			"executorMemory": "56g",
 			"executorCores": 8,
-			"numExecutors": 2,
+			"numExecutors": 1,
 			"runAsWorkspaceSystemIdentity": false,
 			"conf": {
-				"spark.dynamicAllocation.enabled": "false",
-				"spark.dynamicAllocation.minExecutors": "2",
-				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "ceb79f8e-e0f3-4375-bfb3-83bfc819af2c"
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "4",
+				"spark.autotune.trackingId": "bdf46255-4f86-47c9-a322-4507cf3a5f47"
 			}
 		},
 		"metadata": {
@@ -39,10 +39,10 @@
 				"name": "python"
 			},
 			"a365ComputeOptions": {
-				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
-				"name": "sparkpool1",
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/sapient",
+				"name": "sapient",
 				"type": "Spark",
-				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sapient",
 				"auth": {
 					"type": "AAD",
 					"authResource": "https://dev.azuresynapse.net",
@@ -72,7 +72,7 @@
 					"from datetime import time\r\n",
 					"import pytz"
 				],
-				"execution_count": 1
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -88,13 +88,13 @@
 					}
 				},
 				"source": [
-					"pathtoread ='abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/*/*/*'\r\n",
-					"pathtosave =\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/\"\r\n",
+					"pathtoread ='abfss://ayanaananthpuramrealtime@ayanadatalake.dfs.core.windows.net/ananthapuram_realtime_tags/2022/*/*/*'\r\n",
+					"pathtosave =\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/\"\r\n",
 					"\r\n",
 					"tablelisttoreconcile = [\r\n",
 					"    {\r\n",
-					"    \"sitename1\":\"Phelan\",\r\n",
-					"    \"folderpath1\":\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/\",\r\n",
+					"    \"sitename1\":\"Annanthpuram\",\r\n",
+					"    \"folderpath1\":\"abfss://ayanaananthpuramrealtime@ayanadatalake.dfs.core.windows.net/ananthapuram_realtime_tags/\",\r\n",
 					"    \"sitename2\":\"Pavgada\",\r\n",
 					"    \"folderpath2\":\"abfss://ayanapavagadadatalake@ayanadatalake.dfs.core.windows.net/PavagadaOpcData/Pavagada_RealTimeTags/\"\r\n",
 					"    }\r\n",

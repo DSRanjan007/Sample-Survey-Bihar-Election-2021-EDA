@@ -1,0 +1,17 @@
+{
+	"name": "multiprupose_ph",
+	"properties": {
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 1000 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/phelanrealtime/phelan_realtime/2022/07/03/*',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\nWHERE [C3] = 'PLANT_TODAY_IMP_KWH' AND [C2] >= '2022-07-03'\nORDER BY [C2] ASC;\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

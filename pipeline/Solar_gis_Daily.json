@@ -1,0 +1,58 @@
+{
+	"name": "Solar_gis_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Solar_gis_Daily",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "Solar_GIS_Daily",
+						"type": "NotebookReference"
+					},
+					"parameters": {
+						"single": {
+							"value": "1",
+							"type": "float"
+						},
+						"date_from": {
+							"value": "2022-12-01",
+							"type": "string"
+						},
+						"date_to": {
+							"value": "2022-12-19",
+							"type": "string"
+						},
+						"drop_table": {
+							"value": "no",
+							"type": "string"
+						}
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "Sapientia",
+						"type": "BigDataPoolReference"
+					},
+					"conf": {
+						"spark.dynamicAllocation.enabled": null,
+						"spark.dynamicAllocation.minExecutors": null,
+						"spark.dynamicAllocation.maxExecutors": null
+					},
+					"numExecutors": null
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-12-21T08:57:36Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

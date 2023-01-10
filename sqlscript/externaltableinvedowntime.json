@@ -1,0 +1,20 @@
+{
+	"name": "externaltableinvedowntime",
+	"properties": {
+		"folder": {
+			"name": "Antpr"
+		},
+		"content": {
+			"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'repono_ayanadatalake_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [repono_ayanadatalake_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://repono@ayanadatalake.dfs.core.windows.net' \n\t)\nGO\n\nCREATE EXTERNAL TABLE invdowntime (\n\t[Date] nvarchar(4000),\n\t[Inv] nvarchar(4000),\n\t[Down_From] nvarchar(4000),\n\t[Down_To] nvarchar(4000),\n\t[Minutes] float\n\t)\n\tWITH (\n\tLOCATION = 'synapse/workspaces/sapience/warehouse/reassets.db/invdowntime',\n\tDATA_SOURCE = [repono_ayanadatalake_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.invdowntime\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "reanalytics",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -3,12 +3,12 @@
 	"properties": {
 		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for DayConsolidated at Portfolio level.",
 		"folder": {
-			"name": "Ananthapur"
+			"name": "Antpr"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
 		"bigDataPool": {
-			"referenceName": "sparkpool1",
+			"referenceName": "Sapientia",
 			"type": "BigDataPoolReference"
 		},
 		"sessionProperties": {
@@ -16,13 +16,13 @@
 			"driverCores": 8,
 			"executorMemory": "56g",
 			"executorCores": 8,
-			"numExecutors": 2,
+			"numExecutors": 1,
 			"runAsWorkspaceSystemIdentity": false,
 			"conf": {
-				"spark.dynamicAllocation.enabled": "false",
-				"spark.dynamicAllocation.minExecutors": "2",
-				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "ef1c64c3-fee4-456a-a8d8-09547f45d2a8"
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "4",
+				"spark.autotune.trackingId": "456776c6-7f19-4bbc-b95a-ef9f81925f22"
 			}
 		},
 		"metadata": {
@@ -39,10 +39,10 @@
 				"name": "python"
 			},
 			"a365ComputeOptions": {
-				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
-				"name": "sparkpool1",
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/Sapientia",
+				"name": "Sapientia",
 				"type": "Spark",
-				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sapientia",
 				"auth": {
 					"type": "AAD",
 					"authResource": "https://dev.azuresynapse.net",
@@ -98,9 +98,11 @@
 					"from datetime import time\r\n",
 					"import pytz\r\n",
 					"from pathlib import Path\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings(\"ignore\")\r\n",
 					"#import pymsteams"
 				],
-				"execution_count": 1
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -123,7 +125,7 @@
 					"days=abs(todaydate-start_date).days\r\n",
 					"days"
 				],
-				"execution_count": 2
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -139,7 +141,7 @@
 					}
 				},
 				"source": [
-					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\"\r\n",
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/dt=\"\r\n",
 					"LoopCounter=1\r\n",
 					"tz = pytz.timezone('Asia/Kolkata')\r\n",
 					"todaydate = datetime.date(datetime.now(tz))\r\n",
@@ -160,27 +162,7 @@
 					"#location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
 					"#print(location1)"
 				],
-				"execution_count": 10
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					"#str(DateList[0])\r\n",
-					"ml1=[str(DateList[i]) for i in range(len(DateList))]\r\n",
-					"tuple(ml1)"
-				],
-				"execution_count": 14
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -200,7 +182,7 @@
 					"    location1= location1+ str(DateList[i])+str(\"/\")\r\n",
 					"    print(location1)\r\n",
 					"    df2=pd.read_parquet(location1)\r\n",
-					"    #df2=pd.read_parquet(\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=2022-02-19/part-00000-513a047b-d8be-4f4c-99b7-ee9a7d89a754.c000.snappy.parquet\")\r\n",
+					"    #df2=pd.read_parquet(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/dt=2022-02-19/part-00000-513a047b-d8be-4f4c-99b7-ee9a7d89a754.c000.snappy.parquet\")\r\n",
 					"    df2.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
 					"    df2.sort_values(by=\"ISTtime\",ascending=True,inplace=True)\r\n",
 					"    df2=df2[df2[\"sitename\"]==\"ananthpuram\"]\r\n",
@@ -221,7 +203,7 @@
 					"\r\n",
 					"    b1=[]\r\n",
 					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
-					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"    DC_Capacity_list=[75.94721,74.83772,74.89042,75.55669,74.03385]\r\n",
 					"\r\n",
 					"    Tm1_list=[\"ICR8..MT1.MODULE_TEMP\",\"ICR10..MT1.MODULE_TEMP\",\"ICR12..MT.MODULE_TEMP\",\"ICR12..MT.MODULE_TEMP_1\",\"ICR12..MT1.MODULE_TEMP\",\"ICR12..MT1.MODULE_TEMP_1\",\"ICR13..MT1.MODULE_TEMP\",\"ICR13..MT1.MODULE_TEMP1\"]\r\n",
 					"    avg_Tm1_list=[]\r\n",
@@ -259,7 +241,7 @@
 					"\r\n",
 					"    b2=[]\r\n",
 					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
-					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"    DC_Capacity_list=[75.94721,74.83772,74.89042,75.55669,74.03385]\r\n",
 					"\r\n",
 					"    Tm2_list=[\"ICR16..MT1.MODULE_TEMP\",\"ICR16..MT2.MODULE_TEMP\",\"ICR17..MT1.MODULE_TEMP_1\",\"ICR17..MT1.MODULE_TEMP_2\",\"ICR17..MT2.MODULE_TEMP_1\",\"ICR17..MT2.MODULE_TEMP_2\",\"ICR18..MT1.MODULE_TEMP\"]\r\n",
 					"    avg_Tm2_list=[]\r\n",
@@ -313,7 +295,7 @@
 					"\r\n",
 					"    b3=[]\r\n",
 					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
-					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"    DC_Capacity_list=[75.94721,74.83772,74.89042,75.55669,74.03385]\r\n",
 					"\r\n",
 					"    Tm3_list=[\"ICR1..MT1.MODULE_TEMP_1\",\"ICR1..MT1.MODULE_TEMP_2\",\"ICR1..MT2.MODULE_TEMP_1\",\"ICR1..MT2.MODULE_TEMP_2\",\"ICR2..MT1.MODULE_TEMP\",\"ICR3..MT1.MODULE_TEMP\",\"ICR4..MT1.MODULE_TEMP\",\"ICR4..MT1.MODULE_TEMP1\"]\r\n",
 					"    avg_Tm3_list=[]\r\n",
@@ -364,7 +346,7 @@
 					"\r\n",
 					"    b4=[]\r\n",
 					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
-					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"    DC_Capacity_list=[75.94721,74.83772,74.89042,75.55669,74.03385]\r\n",
 					"\r\n",
 					"    Tm4_list=[\"ICR11..MT1.MODULE_TEMP\",\"ICR14..MT1.MODULE_TEMP\",\"ICR15..MT1.MODULE_TEMP\",\"ICR20..MT1.MODULE_TEMP\"]\r\n",
 					"    avg_Tm4_list=[]\r\n",
@@ -415,7 +397,7 @@
 					"\r\n",
 					"    b5=[]\r\n",
 					"    Block_name_list=[\"Antpr1\",\"Antpr2\",\"Antpr3\",\"Antpr4\",\"Antpr5\"]\r\n",
-					"    DC_Capacity_list=[75.8142,74.6830,74.9515,75.1019,73.9730]\r\n",
+					"    DC_Capacity_list=[75.94721,74.83772,74.89042,75.55669,74.03385]\r\n",
 					"\r\n",
 					"    Tm5_list=[\"ICR6..MT1.MODULE_TEMP_1\",\"ICR6..MT1.MODULE_TEMP_2\",\"ICR7..MT1.MODULE_TEMP_1\",\"ICR7..MT1.MODULE_TEMP_2\",\"ICR7..MT2.MODULE_TEMP_1\",\"ICR7..MT2.MODULE_TEMP_2\",\"ICR9..MT1.MODULE_TEMP\"]\r\n",
 					"    avg_Tm5_list=[]\r\n",
@@ -472,7 +454,7 @@
 					"    all_block_list.append(b5)\r\n",
 					"    all_block_list\r\n",
 					"\r\n",
-					"    StaticFile = 'abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/PVSystDayCons.xlsx'\r\n",
+					"    StaticFile = 'abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_PVSyst_DayCons.xlsx'\r\n",
 					"    daily_df=pd.read_excel(StaticFile,sheet_name=\"StaticData_Table1\")\r\n",
 					"    #daily_df.head()\r\n",
 					"\r\n",
@@ -491,7 +473,7 @@
 					"\r\n",
 					"    spark.sql(\"create database if not exists reassets\")\r\n",
 					"    df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.antprdayconsolidated\")\r\n",
-					"    location1=\"abfss://repono@ayanadatalake.dfs.core.windows.net/allcsvtoparquet/dt=\""
+					"    location1=\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/dt=\""
 				],
 				"execution_count": 5
 			},

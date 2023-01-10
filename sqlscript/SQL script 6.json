@@ -2,12 +2,12 @@
 	"name": "SQL script 6",
 	"properties": {
 		"content": {
-			"query": "SELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/ayanapavagadadatalake/PavagadaOpcData/Pavagada_RealTime_OpcUa/**',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\nWHERE [C3] = 'PLANTDATA_ENY_EXP_TDAY' AND [C2] >= '2022-12-05'\nORDER BY [C2] ASC;",
+			"query": "select * from dbo.inverter_table2",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
+				"databaseName": "reassets",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000

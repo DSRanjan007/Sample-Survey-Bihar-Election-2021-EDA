@@ -2,12 +2,12 @@
 	"name": "SQL script 5",
 	"properties": {
 		"content": {
-			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://ayanadatalake.dfs.core.windows.net/devlop/synapse/workspaces/azure-synapse-devlop/warehouse/phelan.db/invperformance/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+			"query": "",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
+				"databaseName": "reassets",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000

@@ -1,0 +1,555 @@
+{
+	"name": "B5_AntprInvClip",
+	"properties": {
+		"folder": {
+			"name": "Antpr"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sapienta",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "6feb1ceb-5a03-4c0e-94b6-1945046f05ff"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1",
+				"state": {
+					"367d2545-eaaf-4435-ac4f-22cfef8728b3": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR05",
+										"4": "INV1",
+										"5": "ICR5..INV1.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR05",
+										"4": "INV2",
+										"5": "ICR5..INV2.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR05",
+										"4": "INV3",
+										"5": "ICR5..INV3.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR05",
+										"4": "INV4",
+										"5": "ICR5..INV4.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR06",
+										"4": "INV1",
+										"5": "ICR6..INV1.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR06",
+										"4": "INV2",
+										"5": "ICR6..INV2.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR06",
+										"4": "INV3",
+										"5": "ICR6..INV3.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR06",
+										"4": "INV4",
+										"5": "ICR6..INV4.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR07",
+										"4": "INV1",
+										"5": "ICR7..INV1.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR07",
+										"4": "INV2",
+										"5": "ICR7..INV2.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR07",
+										"4": "INV3",
+										"5": "ICR7..INV3.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR07",
+										"4": "INV4",
+										"5": "ICR7..INV4.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR09",
+										"4": "INV1",
+										"5": "ICR9..INV1.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR09",
+										"4": "INV2",
+										"5": "ICR9..INV2.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR09",
+										"4": "INV3",
+										"5": "ICR9..INV3.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									},
+									{
+										"0": "2022-05-11",
+										"1": "Ananthapur",
+										"2": "Antpr5",
+										"3": "ICR09",
+										"4": "INV4",
+										"5": "ICR9..INV4.kW",
+										"6": "Inv_Clipping",
+										"7": "0.0"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "Date",
+										"type": "string"
+									},
+									{
+										"key": "1",
+										"name": "SPP",
+										"type": "string"
+									},
+									{
+										"key": "2",
+										"name": "Block",
+										"type": "string"
+									},
+									{
+										"key": "3",
+										"name": "ICR",
+										"type": "string"
+									},
+									{
+										"key": "4",
+										"name": "Inv",
+										"type": "string"
+									},
+									{
+										"key": "5",
+										"name": "Tags",
+										"type": "string"
+									},
+									{
+										"key": "6",
+										"name": "Loss_Category",
+										"type": "string"
+									},
+									{
+										"key": "7",
+										"name": "Loss",
+										"type": "double"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"0"
+									],
+									"seriesFieldKeys": [
+										"7"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/sapienta",
+				"name": "sapienta",
+				"type": "Spark",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sapienta",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"import pymsteams"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/dt=\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0\r\n",
+					""
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"location1 = pattoreadparquet   \r\n",
+					"location1= location1+ str(DateList[DateLoopCounter])+str(\"/\")\r\n",
+					"print(location1)\r\n",
+					"df = pd.read_parquet(location1)"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"from pathlib import Path\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')\r\n",
+					"\r\n",
+					"New=pd.DataFrame(columns=[])\r\n",
+					"\r\n",
+					"location_input='abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_StaticData_Inverter/'\r\n",
+					"location_output='abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_Insights/Antpr_Insights_Table2Inv/'\r\n",
+					"df = pd.read_parquet(location1)\r\n",
+					"#df = pd.read_parquet(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/dt=2022-04-18/\")\r\n",
+					"\r\n",
+					"tags=pd.read_excel(location_input+\"Antpr_OperationalTags.xlsx\",sheet_name='INV')\r\n",
+					"\r\n",
+					"tag=list(tags['Block5'].dropna())\r\n",
+					"\r\n",
+					"\r\n",
+					"df=df[df['itemname'].isin(tag)] \r\n",
+					"\r\n",
+					"df['Time']= df['ISTtime'].dt.strftime(\"%H:%M\")\r\n",
+					"df=df[(df['Time'] >='06:00') & (df['Time']<='18:30')]\r\n",
+					"\r\n",
+					"#df.drop(df.index[(df['itemname'] == 'ICR10..INV1.SCB_11') | (df['itemname'] == 'ICR10..INV1.SCB_12') ], inplace = True)\r\n",
+					"#df.to_parquet('C:\\\\Users\\\\Lenovo\\\\Downloads\\\\myfile.parquet')\r\n",
+					"\r\n",
+					"New['Date_And_Time'] = pd.to_datetime(df['ISTtime']).dt.strftime(\"%Y-%m-%d %H:%M\")\r\n",
+					"New['Tags']=df['itemname']\r\n",
+					"New['Value']=df['value']\r\n",
+					"# New.to_excel(\"C:\\\\Users\\\\Lenovo\\\\Desktop\\\\Man_Original.xlsx\")\r\n",
+					"New=New.drop_duplicates(keep=\"last\",inplace=False)\r\n",
+					"New = New.sort_values(by = 'Date_And_Time')\r\n",
+					"New.reset_index(level=0, inplace=True)    \r\n",
+					"del New['index']\r\n",
+					"\r\n",
+					"###############################################\r\n",
+					"df2=New.copy()\r\n",
+					"\r\n",
+					"df2[\"Date_And_Time\"]=df2[\"Date_And_Time\"].astype(\"datetime64[ns]\")\r\n",
+					"df2[\"Date\"]=pd.DatetimeIndex(df2[\"Date_And_Time\"]).date\r\n",
+					"df2[\"Time\"]=pd.DatetimeIndex(df2[\"Date_And_Time\"]).time\r\n",
+					"df2[\"Hour\"]=pd.DatetimeIndex(df2[\"Date_And_Time\"]).hour\r\n",
+					"df2[\"Minute\"]=pd.DatetimeIndex(df2[\"Date_And_Time\"]).minute\r\n",
+					"Date=df2.loc[3,\"Date\"]\r\n",
+					"def grouped_min(value):\r\n",
+					"    if value in range(1,6):\r\n",
+					"        return 5\r\n",
+					"    elif value in range(6,11):\r\n",
+					"        return 10\r\n",
+					"    elif value in range(11,16):\r\n",
+					"        return 15\r\n",
+					"    elif value in range(16,21):\r\n",
+					"        return 20\r\n",
+					"    elif value in range(21,26):\r\n",
+					"        return 25\r\n",
+					"    elif value in range(26,31):\r\n",
+					"        return 30\r\n",
+					"    elif value in range(31,36):\r\n",
+					"        return 35\r\n",
+					"    elif value in range(36,41):\r\n",
+					"        return 40\r\n",
+					"    elif value in range(41,46):\r\n",
+					"        return 45\r\n",
+					"    elif value in range(46,51):\r\n",
+					"        return 50\r\n",
+					"    elif value in range(51,56):\r\n",
+					"        return 55\r\n",
+					"    elif value in range(56,60) or value==0:\r\n",
+					"        return 0\r\n",
+					"\r\n",
+					"df2[\"grouped_min\"]=df2[\"Minute\"].apply(grouped_min)\r\n",
+					"\r\n",
+					"df2c=df2.groupby(by=[\"Tags\",\"Hour\",\"grouped_min\"]).agg(\"mean\").reset_index()\r\n",
+					"df2c['Date']=Date\r\n",
+					"df2c[\"SPP\"]=\"Ananthapur\"\r\n",
+					"\r\n",
+					"df2c[\"ICR\"]=df2c[\"Tags\"].apply(lambda x:x.split(\"..\")[0])\r\n",
+					"df2c[\"INV\"]=df2c[\"Tags\"].apply(lambda x:x.split(\"..\")[1].split('.')[0])\r\n",
+					"df2c[\"SCB\"]=df2c[\"Tags\"].apply(lambda x:x.split(\"..\")[1].split('.')[1])\r\n",
+					"\r\n",
+					"df2c[\"Block\"]='Antpr5'\r\n",
+					"\r\n",
+					"df2c=df2c.set_index(\"Date\")\r\n",
+					"df2c['Hour']=df2c['Hour'].astype(str).str.zfill(2)\r\n",
+					"df2c['grouped_min']=df2c['grouped_min'].astype(str).str.zfill(2)\r\n",
+					"df2c['Time']=df2c['Hour']+':'+df2c['grouped_min']\r\n",
+					"df2c=df2c[[\"Time\",\"Hour\",\"Minute\",\"grouped_min\",\"SPP\",\"Block\",\"ICR\",\"INV\",\"SCB\",\"Tags\",\"Value\"]]\r\n",
+					"ICR_dict={\"ICR1\":\"ICR01\",\r\n",
+					"         \"ICR2\":\"ICR02\",\r\n",
+					"         \"ICR3\":\"ICR03\",\r\n",
+					"         \"ICR4\":\"ICR04\",\r\n",
+					"         \"ICR5\":\"ICR05\",\r\n",
+					"         \"ICR6\":\"ICR06\",\r\n",
+					"         \"ICR7\":\"ICR07\",\r\n",
+					"         \"ICR8\":\"ICR08\",\r\n",
+					"         \"ICR9\":\"ICR09\"}\r\n",
+					"df2c[\"ICR\"].replace(ICR_dict,inplace=True)\r\n",
+					"df2c.reset_index(level=0, inplace=True)   ### Resetting  Index \r\n",
+					"clip_df=df2c[df2c['Tags'].isin(tag)] \r\n",
+					"clip_df = clip_df.sort_values(by = 'Tags')\r\n",
+					"clip_df.reset_index(level=0, inplace=True)   ### Resetting  Index \r\n",
+					"clip_df=clip_df[['Date','Time','SPP','Block','ICR','INV','Tags','Value']]\r\n",
+					"\r\n",
+					"clip_df['Value']=3437.5-clip_df['Value']\r\n",
+					"sum1=0\r\n",
+					"\r\n",
+					"if Path(location_output+'B5_InPerf.xlsx').is_file():            ### Finding weather the  file is present in the path or not \r\n",
+					"    new_clip_df=pd.read_excel(location_output+'B5_InPerf.xlsx')         ### If File is present, reading the that file into a dataframe\r\n",
+					"    row_count=(new_clip_df['Date'].count())\r\n",
+					"else:\r\n",
+					"    new_clip_df=pd.DataFrame(columns=['Date','SPP','Block','ICR','Inv','Tags','Loss_Category','Loss'])\r\n",
+					"    row_count=0\r\n",
+					"for i in tag:\r\n",
+					"    clip_df_cal=clip_df[clip_df['Tags']==(i)]\r\n",
+					"    clip_df_cal.reset_index(level=0, inplace=True)   ### Resetting  Index \r\n",
+					"    del clip_df_cal['index']\r\n",
+					"    if (clip_df_cal['Date'].count())>=1:\r\n",
+					"        sum1=[val for val in clip_df_cal['Value'] if val<312.5]\r\n",
+					"        new_clip_df.loc[row_count,'Date']=(clip_df_cal.loc[0,'Date'])\r\n",
+					"        new_clip_df.loc[row_count,'SPP']=(clip_df_cal.loc[0,'SPP'])\r\n",
+					"        new_clip_df.loc[row_count,'Block']=(clip_df_cal.loc[0,'Block'])\r\n",
+					"        new_clip_df.loc[row_count,'ICR']=(clip_df_cal.loc[0,'ICR'])\r\n",
+					"        new_clip_df.loc[row_count,'Inv']=(clip_df_cal.loc[0,'INV'])\r\n",
+					"        new_clip_df.loc[row_count,'Tags']=(clip_df_cal.loc[0,'Tags'])\r\n",
+					"        new_clip_df.loc[row_count,'Loss_Category']='Inv_Clipping'\r\n",
+					"        new_clip_df.loc[row_count,'Loss']=(sum(sum1))*10/60\r\n",
+					"        row_count+=1\r\n",
+					"  \r\n",
+					"new_clip_df[\"Date\"]=new_clip_df[\"Date\"].astype(\"datetime64[ns]\")\r\n",
+					"new_clip_df['Date']=new_clip_df['Date'].dt.strftime(\"%Y-%m-%d\")\r\n",
+					"new_clip_df=new_clip_df[['Date','SPP','Block','ICR','Inv','Tags','Loss_Category','Loss']]\r\n",
+					"new_clip_df.to_excel(location_output+\"Antpr_B5_InvClipCons.xlsx\",index=False)"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark=spark.createDataFrame(new_clip_df)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.InvClip\")"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"#display(new_clip_df)"
+				],
+				"execution_count": 12
+			}
+		]
+	}
+}

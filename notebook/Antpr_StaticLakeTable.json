@@ -1,0 +1,210 @@
+{
+	"name": "Antpr_StaticLakeTable",
+	"properties": {
+		"folder": {
+			"name": "Antpr"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sapientia",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 1,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "4",
+				"spark.autotune.trackingId": "3e9c901a-37d5-4d75-a14b-c8814e63a5cd"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/Sapientia",
+				"name": "Sapientia",
+				"type": "Spark",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sapientia",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"import pymsteams"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"DCLoad = pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_StaticData_PowerBI/Antpr_DCLoadLatLong.csv\")\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(DCLoad)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.DCLoadLatLong\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Tags = pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_StaticData_PowerBI/Antpr_Tags.csv\", encoding = 'Latin1')\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(Tags)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.TAGS\")"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"drop table reassets.Inverter_TABLE2\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"inv = pd.read_excel(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_StaticData_PowerBI/Antpr_Inverter.xlsx\")\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(inv)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.Inverter_TABLE2\")"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pvsyst = pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_StaticData_PowerBI/Antpr_PVSyst.csv\")\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(pvsyst)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.PVSystData\")"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"AntprLoss = pd.read_excel(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/Antpr_StaticData/Antpr_StaticData_PowerBI/AntprLoss.xlsx\",sheet_name = \"Sheet2\")\r\n",
+					"\r\n",
+					"df_spark = spark.createDataFrame(AntprLoss)\r\n",
+					"spark.sql(\"create database if not exists reassets\")\r\n",
+					"df_spark.write.format(\"delta\").mode(\"append\").saveAsTable(\"reassets.AntprstaticLoss\")"
+				],
+				"execution_count": 2
+			}
+		]
+	}
+}

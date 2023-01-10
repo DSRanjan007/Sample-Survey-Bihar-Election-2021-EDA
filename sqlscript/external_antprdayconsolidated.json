@@ -1,0 +1,20 @@
+{
+	"name": "external_antprdayconsolidated",
+	"properties": {
+		"folder": {
+			"name": "Antpr"
+		},
+		"content": {
+			"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'repono_ayanadatalake_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [repono_ayanadatalake_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://repono@ayanadatalake.dfs.core.windows.net' \n\t)\nGO\n-- DROP EXTERNAL TABLE dbo.antprdayconsolidated\nCREATE EXTERNAL TABLE antprdayconsolidated (\n\t[Block] nvarchar(4000),\n\t[Date] datetime2(7),\n\t[DC_Capacity] float,\n\t[PVSyst_GHI] float,\n\t[PVSyst_GII] float,\n\t[PVSyst_EGrid] float,\n\t[PVSyst_TAmb_Avg] float,\n\t[PVSyst_TAmb_WtAvg] float,\n\t[PVSyst_TArray_Avg] float,\n\t[PVSyst_TArray_WtAvg] float,\n\t[GHI] float,\n\t[GII] float,\n\t[Tamb] float,\n\t[Tm] float,\n\t[RH] float,\n\t[InvEnergy] float,\n\t[Inv_Donwtime] float,\n\t[Peak_Power] float,\n\t[CO2_Reduction] float,\n\t[ExportEnergy] float,\n\t[ImportEnergyMeter] float,\n\t[PA] float,\n\t[GA] float\n\t)\n\tWITH (\n\tLOCATION = 'synapse/workspaces/sapience/warehouse/reassets.db/antprdayconsolidated',\n\tDATA_SOURCE = [repono_ayanadatalake_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.antprdayconsolidated\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "reanalytics",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,33 @@
+{
+	"name": "Antprdaycons",
+	"properties": {
+		"description": "This triggers the Daily Day Consolidated Portfolio level KPIs in teams and populates AntprDaycons table in LakeDatabase",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "AntprDayCons",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-02-21T10:06:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						45
+					],
+					"hours": [
+						3
+					]
+				}
+			}
+		}
+	}
+}

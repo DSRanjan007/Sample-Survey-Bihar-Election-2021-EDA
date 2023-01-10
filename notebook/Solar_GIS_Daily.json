@@ -1,0 +1,1252 @@
+{
+	"name": "Solar_GIS_Daily",
+	"properties": {
+		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for DayConsolidated at Portfolio level.",
+		"folder": {
+			"name": "Antpr"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Sapdevpool1",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "ab51de76-5b08-496a-ad16-84ce6be1acbc"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1",
+				"state": {
+					"dc0a4479-abef-4eb2-9d6a-2d42340a7b70": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "0"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "count(1)",
+										"type": "bigint"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/Sapdevpool1",
+				"name": "Sapdevpool1",
+				"type": "Spark",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sapdevpool1",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**ANTPR DayConslidated Tables with Portfolio Level KPIs**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pandas as pd \r\n",
+					"import datetime\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"import pyspark.sql.functions as sf\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"# from pyspark.sql.functions import to_date\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"from pathlib import Path\r\n",
+					"import pymsteams\r\n",
+					"import warnings \r\n",
+					"warnings.filterwarnings(\"ignore\")"
+				],
+				"execution_count": 84
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pattoreadparquet = \"abfss://repono@ayanadatalake.dfs.core.windows.net/Antpr/allcsvtoparquet/dt=\"\r\n",
+					"LoopCounter=1\r\n",
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))\r\n",
+					"print(todaydate)\r\n",
+					"mintime = datetime.min.time()\r\n",
+					"DateList =[]\r\n",
+					"while LoopCounter <= 1 :\r\n",
+					"    DateList.append( datetime.date ( (datetime.combine(todaydate, mintime) - timedelta(days=LoopCounter)) ))\r\n",
+					"    LoopCounter += 1\r\n",
+					"DateListLength = len(DateList)\r\n",
+					"print(DateList)\r\n",
+					"TableLoopCounter = 0\r\n",
+					"DateLoopCounter = 0"
+				],
+				"execution_count": 85
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import requests\r\n",
+					"import os\r\n",
+					"from bs4 import BeautifulSoup\r\n",
+					"import pandas as pd\r\n",
+					"import numpy as np\r\n",
+					"import warnings\r\n",
+					"warnings.filterwarnings('ignore')\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"from datetime import datetime \r\n",
+					"from datetime import date \r\n",
+					"from datetime import timedelta\r\n",
+					"from datetime import time\r\n",
+					"import pytz\r\n",
+					"import os"
+				],
+				"execution_count": 86
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"url='https://solargis.info/ws/rest/datadelivery/request?key=MIdLrfftlFVU8AzsrEKw'\r\n",
+					"headers = {'Content-Type': 'application/xml'}"
+				],
+				"execution_count": 87
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"**USE BELOW BLOCK IF MANUAL OPERATION IS REQUIRED ANYTIME**"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"tz = pytz.timezone('Asia/Kolkata')\r\n",
+					"todaydate = datetime.date(datetime.now(tz))-timedelta(days=1)\r\n",
+					"#print(todaydate)\r\n",
+					"td=todaydate\r\n",
+					"td=str(td)"
+				],
+				"execution_count": 88
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"tags": [
+						"parameters"
+					]
+				},
+				"source": [
+					"date_from='2022-12-01'\r\n",
+					"date_to='2022-12-18'\r\n",
+					"single=1\r\n",
+					"drop_table='no'"
+				],
+				"execution_count": 89
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"if drop_table==\"yes\":\r\n",
+					"    spark.sql(\"drop table solar_gis.ayana_solar_gis_wms_table\")"
+				],
+				"execution_count": 90
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"if single==1:\r\n",
+					"    td=str(td)\r\n",
+					"elif single==0:\r\n",
+					"    date_f=date_from\r\n",
+					"    date_to=date_to\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 91
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"14.31\" lng=\"77.39\">\r\n",
+					"       <geo:terrain elevation=\"557\" azimuth=\"180\" tilt=\"11\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"Pavagada.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('Pavagada.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('Pavagada')\r\n",
+					"param1=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param1['Date']=param1['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param1['Date']=param1['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param1['GHI_Value']=param1['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param1['Date']=param1['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param1.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param1[i]=param1[i].astype(float)\r\n",
+					"param1\r\n",
+					"if os.path.exists(\"Pavagada.xml\"):\r\n",
+					"    os.remove(\"Pavagada.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 92
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"param1"
+				],
+				"execution_count": 93
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"28.27\" lng=\"73.4\">\r\n",
+					"       <geo:terrain elevation=\"185\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"Bikaner.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('Bikaner.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('Bkn')\r\n",
+					"param2=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param2['Date']=param2['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param2['Date']=param2['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param2['GHI_Value']=param2['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param2['Date']=param2['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param2.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param2[i]=param2[i].astype(float)\r\n",
+					"param2\r\n",
+					"if os.path.exists(\"Bikaner.xml\"):\r\n",
+					"    os.remove(\"Bikaner.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"14.04\" lng=\"78.42\">\r\n",
+					"       <geo:terrain elevation=\"454\" azimuth=\"180\" tilt=\"10\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"Ananthapur.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('Ananthapur.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('Antpr')\r\n",
+					"param3=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param3['Date']=param3['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param3['Date']=param3['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param3['GHI_Value']=param3['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param3['Date']=param3['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param3.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param3[i]=param3[i].astype(float)\r\n",
+					"param3\r\n",
+					"if os.path.exists(\"Ananthapur.xml\"):\r\n",
+					"    os.remove(\"Ananthapur.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"27.36\" lng=\"72.14\">\r\n",
+					"       <geo:terrain elevation=\"236\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"Acme.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('Acme.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('MSEDCL')\r\n",
+					"param4=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param4['Date']=param4['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param4['Date']=param4['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param4['GHI_Value']=param4['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param4['Date']=param4['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param4.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param4[i]=param4[i].astype(float)\r\n",
+					"param4\r\n",
+					"if os.path.exists(\"Acme.xml\"):\r\n",
+					"    os.remove(\"Acme.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"\r\n",
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"27.53\" lng=\"71.95\">\r\n",
+					"       <geo:terrain elevation=\"177\" azimuth=\"180\" tilt=\"20\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"Phelan.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('Phelan.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('Bhdl')\r\n",
+					"param5=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param5['Date']=param5['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param5['Date']=param5['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param5['GHI_Value']=param5['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param5['Date']=param5['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param5.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param5[i]=param5[i].astype(float)\r\n",
+					"param5\r\n",
+					"if os.path.exists(\"Phelan.xml\"):\r\n",
+					"    os.remove(\"Phelan.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"15.79\" lng=\"75.49\">\r\n",
+					"       <geo:terrain elevation=\"571\" azimuth=\"180\" tilt=\"11\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"ASPPL.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('ASPPL.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('ASPPL_Nargund')\r\n",
+					"param6=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param6['Date']=param6['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param6['Date']=param6['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param6['GHI_Value']=param6['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param6['Date']=param6['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param6.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param6[i]=param6[i].astype(float)\r\n",
+					"param6\r\n",
+					"if os.path.exists(\"ASPPL.xml\"):\r\n",
+					"    os.remove(\"ASPPL.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"16.37\" lng=\"74.78\">\r\n",
+					"       <geo:terrain elevation=\"664\" azimuth=\"180\" tilt=\"11\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"TSPPL.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('TSPPL.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('TSPPL_Chikodi')\r\n",
+					"param7=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param7['Date']=param7['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param7['Date']=param7['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param7['GHI_Value']=param7['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param7['Date']=param7['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param7.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param7[i]=param7[i].astype(float)\r\n",
+					"param7\r\n",
+					"if os.path.exists(\"TSPPL.xml\"):\r\n",
+					"    os.remove(\"TSPPL.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"request_xml='''<ws:dataDeliveryRequest dateFrom=\"xxxx\" dateTo=\"yyyy\"\r\n",
+					"    xmlns=\"http://geomodel.eu/schema/data/request\"\r\n",
+					"    xmlns:ws=\"http://geomodel.eu/schema/ws/data\"\r\n",
+					"    xmlns:geo=\"http://geomodel.eu/schema/common/geo\"\r\n",
+					"    xmlns:pv=\"http://geomodel.eu/schema/common/pv\"\r\n",
+					"    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n",
+					"       \r\n",
+					"    <site id=\"demo\" lat=\"8.9333373\" lng=\"77.9016667\">\r\n",
+					"       <geo:terrain elevation=\"84\" azimuth=\"180\" tilt=\"8\"/>\r\n",
+					"       <geo:horizon>0:3.6 123:5.6 359:6</geo:horizon>\r\n",
+					"       <pv:geometry xsi:type=\"pv:GeometryFixedOneAngle\" azimuth=\"180\" tilt=\"19\"/>\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisHorizontalNS\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/>  -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisInclinedNS\" axisTilt=\"30\" rotationLimitEast=\"-90\" rotationLimitWest=\"90\" backTracking=\"true\" azimuth=\"180\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryOneAxisVertical\" tilt=\"25\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\" backTracking=\"true\"/> -->\r\n",
+					"       <!-- <pv:geometry xsi:type=\"pv:GeometryTwoAxisAstronomical\" rotationLimitEast=\"-180\" rotationLimitWest=\"180\"\r\n",
+					"                tiltLimitMin=\"10\" tiltLimitMax=\"60\" backTracking=\"true\"/> -->\r\n",
+					"        <pv:system installedPower=\"463200\" installationType=\"FREE_STANDING\" dateStartup=\"2014-01-03\" selfShading=\"true\">\r\n",
+					"            <pv:module type=\"CSI\">\r\n",
+					"                <pv:degradation>0.7</pv:degradation>\r\n",
+					"                <pv:degradationFirstYear>2</pv:degradationFirstYear>\r\n",
+					"                <pv:nominalOperatingCellTemp>45</pv:nominalOperatingCellTemp>\r\n",
+					"                <pv:PmaxCoeff>-0.42</pv:PmaxCoeff>\r\n",
+					"            </pv:module>\r\n",
+					"            <pv:inverter>\r\n",
+					"                <pv:efficiency xsi:type=\"pv:EfficiencyConstant\" percent=\"97.5\"/>\r\n",
+					"                <!--<pv:efficiency xsi:type=\"pv:EfficiencyCurve\" dataPairs=\"0:20 50:60 100:80 150:90 233:97.5 350:97 466:96.5 583:96 700:95.5 750:93.33 800:87.5 850:82.35 900:77.8 950:73.7\"/>-->\r\n",
+					"                <pv:limitationACPower>900</pv:limitationACPower>\r\n",
+					"            </pv:inverter>\r\n",
+					"            <pv:losses>\r\n",
+					"                <pv:acLosses cables=\"0.1\" transformer=\"0.9\"/>\r\n",
+					"                <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" snowPollution=\"3.0\"/>\r\n",
+					"                <!-- <pv:dcLosses cables=\"0.2\" mismatch=\"0.3\" monthlySnowPollution=\"5 5.2 3 1 1 1 1 1 1 1 2 4\"/> -->\r\n",
+					"            </pv:losses>\r\n",
+					"            <pv:topology xsi:type=\"pv:TopologySimple\" relativeSpacing=\"2.4\" type=\"UNPROPORTIONAL2\"/>\r\n",
+					"            <!-- <pv:topology xsi:type=\"pv:TopologyColumn\" relativeSpacing=\"2.5\" type=\"UNPROPORTIONAL2\"/> -->\r\n",
+					"        </pv:system>\r\n",
+					"    </site>  \r\n",
+					"    <processing key=\"GHI GTI TEMP WS PVOUT\" summarization=\"HOURLY\" terrainShading=\"true\">\r\n",
+					"      <timeZone>GMT+05</timeZone>\r\n",
+					"      <timestampType>END</timestampType>\r\n",
+					"    </processing> \r\n",
+					"</ws:dataDeliveryRequest>'''\r\n",
+					"if single==1:\r\n",
+					"    request_xml=request_xml.replace('xxxx',str(td))\r\n",
+					"    request_xml=request_xml.replace('yyyy',str(td))\r\n",
+					"elif single==0:\r\n",
+					"    request_xml=request_xml.replace(\"xxxx\",str(date_f))\r\n",
+					"    request_xml=request_xml.replace(\"yyyy\",str(date_to))\r\n",
+					"headers = {'Content-Type': 'application/xml'}\r\n",
+					"with requests.post(url, data=request_xml.encode('utf8'), headers=headers) as response:\r\n",
+					"        xml_file=response.text\r\n",
+					"f=open(\"TSSPL.xml\", \"w\")\r\n",
+					"f.write(xml_file)\r\n",
+					"with open('TSSPL.xml', 'r') as f:\r\n",
+					"    file = f.read() \r\n",
+					"soup = BeautifulSoup(file, 'xml')\r\n",
+					"names = soup.find_all('row')\r\n",
+					"param=[]\r\n",
+					"for name in names:\r\n",
+					"    param.append(str(name))\r\n",
+					"Date=[]\r\n",
+					"V1=[]\r\n",
+					"V2=[]\r\n",
+					"V3=[]\r\n",
+					"V4=[]\r\n",
+					"V5=[]\r\n",
+					"for i in range(len(param)):\r\n",
+					"    x=param[i].split(' ')[1].split('=')[1]\r\n",
+					"    y=param[i].split(' ')[2].split('=')[1].split('/')[0].split(' ')[0]\r\n",
+					"    z=param[i].split(' ')[3]\r\n",
+					"    m=param[i].split(' ')[4]\r\n",
+					"    n=param[i].split(' ')[5]\r\n",
+					"    V1.append(x)\r\n",
+					"    V2.append(y)\r\n",
+					"    V3.append(z)\r\n",
+					"    V4.append(m)\r\n",
+					"    V5.append(n)\r\n",
+					"SPP=[]\r\n",
+					"for j in range(len(V1)):\r\n",
+					"    SPP.append('TSSPL_TamilNadu')\r\n",
+					"param8=pd.DataFrame({'SPP': SPP,'Date':V1,'GHI_Value':V2,'GTI_Value':V3,'Temp':V4,'Wind_Speed':V5})\r\n",
+					"param8['Date']=param8['Date'].apply(lambda x:x.lstrip('\\\"'))\r\n",
+					"param8['Date']=param8['Date'].apply(lambda x:x.rstrip('\\\"'))\r\n",
+					"param8['GHI_Value']=param8['GHI_Value'].apply(lambda x:x.strip('\\\"'))\r\n",
+					"param8['Date']=param8['Date'].astype('datetime64[ns]')\r\n",
+					"for i in list(param8.drop(['Date','SPP'],axis=1)):\r\n",
+					"    param8[i]=param8[i].astype(float)\r\n",
+					"param8\r\n",
+					"if os.path.exists(\"TSSPL.xml\"):\r\n",
+					"    os.remove(\"TSSPL.xml\")\r\n",
+					"else:\r\n",
+					"    print(\"The file does not exist\")\r\n",
+					"\r\n",
+					"\r\n",
+					"df_final=pd.DataFrame()\r\n",
+					"df_final=df_final.append([param1,param2,param3,param4,param5,param6,param7,param8])\r\n",
+					"df_final\r\n",
+					""
+				],
+				"execution_count": 94
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType,StructField,StringType,DateType,FloatType,LongType,DoubleType,TimestampType"
+				],
+				"execution_count": 95
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"schema=StructType([StructField(\"SPP\",StringType()),\r\n",
+					"StructField(\"Date\",TimestampType()),\r\n",
+					"StructField(\"GHI_Value\",DoubleType()),\r\n",
+					"StructField(\"GTI_Value\",DoubleType()),\r\n",
+					"StructField(\"Temp\",DoubleType()),\r\n",
+					"])"
+				],
+				"execution_count": 96
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_spark2=spark.createDataFrame(df_final, schema = schema)"
+				],
+				"execution_count": 97
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"create database if not exists solar_gis\")\r\n",
+					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"solar_gis.ayana_solar_gis_wms_table\")"
+				],
+				"execution_count": 98
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df1=spark.sql(\"select count(*) from solar_gis.ayana_solar_gis_wms_table\")\r\n",
+					"display(df1)"
+				],
+				"execution_count": 99
+			}
+		]
+	}
+}

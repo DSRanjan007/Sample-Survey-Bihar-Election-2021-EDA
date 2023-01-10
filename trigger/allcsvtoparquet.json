@@ -1,0 +1,33 @@
+{
+	"name": "allcsvtoparquet",
+	"properties": {
+		"description": "This trigger will run daily \"allcsvtoparquet\" notebook. This notebook converts the daily \".csv\" files in \"Ananthapuram_realttime_tags\" folder in ADLS to \".parquet\" format present in REPONO container mapped with Piyush's Azure account",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "DailyRunallcsvtoparquet",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-01-31T00:15:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						2
+					]
+				}
+			}
+		}
+	}
+}

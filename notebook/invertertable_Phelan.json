@@ -3,26 +3,26 @@
 	"properties": {
 		"description": "This code is written to read daily Parquet files and perform the transformation to create Table for Inverters' Performance for Phelan SPP",
 		"folder": {
-			"name": "phelan"
+			"name": "Phelan"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
 		"bigDataPool": {
-			"referenceName": "sparkpool1",
+			"referenceName": "Sapdevpool2",
 			"type": "BigDataPoolReference"
 		},
 		"sessionProperties": {
-			"driverMemory": "28g",
-			"driverCores": 4,
-			"executorMemory": "28g",
-			"executorCores": 4,
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
 			"numExecutors": 2,
 			"runAsWorkspaceSystemIdentity": false,
 			"conf": {
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "f7d84e2b-8bb0-4ef1-ba7c-f59a6d609622"
+				"spark.autotune.trackingId": "bde95c6d-9c0f-4304-af5b-a416c9fd0a8d"
 			}
 		},
 		"metadata": {
@@ -39,16 +39,16 @@
 				"name": "python"
 			},
 			"a365ComputeOptions": {
-				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/azure-synapse-devlop/bigDataPools/sparkpool1",
-				"name": "sparkpool1",
+				"id": "/subscriptions/37a47312-6f04-42dc-ad99-290d950fab5d/resourceGroups/AzureSynapse/providers/Microsoft.Synapse/workspaces/sapience/bigDataPools/Sapdevpool2",
+				"name": "Sapdevpool2",
 				"type": "Spark",
-				"endpoint": "https://azure-synapse-devlop.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool1",
+				"endpoint": "https://sapience.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Sapdevpool2",
 				"auth": {
 					"type": "AAD",
 					"authResource": "https://dev.azuresynapse.net",
 					"authHeader": null
 				},
-				"sparkVersion": "3.1",
+				"sparkVersion": "3.2",
 				"nodeCount": 10,
 				"cores": 8,
 				"memory": 56,
@@ -88,19 +88,39 @@
 					"import datetime\n",
 					"import numpy as np\n",
 					"import matplotlib.pyplot as plt\n",
-					"#from pyspark.sql import SparkSession\n",
-					"#from pyspark.sql.types import *\n",
-					"#import pyspark.sql.functions as sf\n",
+					"from pyspark.sql import SparkSession\n",
+					"from pyspark.sql.types import *\n",
+					"import pyspark.sql.functions as sf\n",
 					"from datetime import datetime \n",
 					"from datetime import date \n",
 					"from datetime import timedelta\n",
-					"# from pyspark.sql.functions import to_date\n",
+					"from pyspark.sql.functions import to_date\n",
 					"from datetime import time\n",
 					"import pytz\n",
 					"from pathlib import Path\n",
-					"#import pymsteams"
+					"import pymsteams\n",
+					"import warnings\n",
+					"warnings.filterwarnings(\"ignore\")"
 				],
-				"execution_count": 159
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#spark.sql(\"drop table phelan.invperformance\")"
+				],
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -120,7 +140,52 @@
 					"TableLoopCounter = 0\n",
 					"DateLoopCounter = 0"
 				],
-				"execution_count": 160
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"StaticFile = 'abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_PVSyst_DayCons.xlsx'\r\n",
+					"daily_df=pd.read_excel(StaticFile)\r\n",
+					"#daily_df.head()\r\n",
+					"#print(daily_df.head())\r\n",
+					"Pr=daily_df[daily_df[\"Date\"]==str(todaydate)]\r\n",
+					"#print(Pr)\r\n",
+					"Pr=(Pr.iloc[0,4]/Pr.iloc[0,3])/75\r\n",
+					"Pr"
+				],
+				"execution_count": 191
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_Static=pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_StaticData_Inverter/Bhdl_Inverter_DowntimeLossCalc.csv\")\r\n",
+					"df_Static.head(5)\r\n",
+					"#df_Static[\"InvEnergy_kWh\"]=df_Static[\"InvEnergy_kWh\"].apply(lambda x:x[4:-1])"
+				],
+				"execution_count": 192
 			},
 			{
 				"cell_type": "code",
@@ -130,19 +195,37 @@
 					"print(location1)\n",
 					"#df = pd.read_parquet(location1)"
 				],
-				"execution_count": 161
+				"execution_count": 193
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"df=  spark.read.load(location1, format='csv', header=True)\n",
-					"#df=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/06/02/*\", format='csv', header=True,infer_schema=True)\n",
+					"#df=  spark.read.load(\"abfss://phelanrealtime@ayanadatalake.dfs.core.windows.net/phelan_realtime/2022/07/17/*\", format='csv', header=True,infer_schema=True)\n",
 					"#df = spark.read.load(location1, format='csv', header=True)\n",
 					"#display(df)\n",
 					"df=df.toPandas()\n",
 					"df"
 				],
-				"execution_count": 162
+				"execution_count": 194
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#spark.sql(\"drop table phelan.invperformance\")"
+				],
+				"execution_count": 195
 			},
 			{
 				"cell_type": "code",
@@ -160,14 +243,7 @@
 				"source": [
 					"df.drop(columns=[\"deviceid\",\"quality\",\"timestamp\",\"EventProcessedUtcTime\",\"PartitionId\",\"EventEnqueuedUtcTime\",\"IoTHub\"],inplace=True)"
 				],
-				"execution_count": 163
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"location_input=\"abfss://repono@ayanadatalake.dfs.core.windows.net/staticfiles/\""
-				],
-				"execution_count": 164
+				"execution_count": 196
 			},
 			{
 				"cell_type": "code",
@@ -217,7 +293,7 @@
 					"df1=df.copy()\n",
 					"df2=df.copy()"
 				],
-				"execution_count": 165
+				"execution_count": 198
 			},
 			{
 				"cell_type": "code",
@@ -235,7 +311,7 @@
 				"source": [
 					"Radiation_Block1"
 				],
-				"execution_count": 166
+				"execution_count": 199
 			},
 			{
 				"cell_type": "code",
@@ -258,7 +334,7 @@
 					"df = df[~df[\"itemname\"].str.contains('MOD', na=True)]\n",
 					"len(df[\"itemname\"].unique())"
 				],
-				"execution_count": 167
+				"execution_count": 200
 			},
 			{
 				"cell_type": "code",
@@ -276,7 +352,7 @@
 				"source": [
 					"df"
 				],
-				"execution_count": 168
+				"execution_count": 201
 			},
 			{
 				"cell_type": "code",
@@ -295,7 +371,7 @@
 					"df[\"ICR\"]=df[\"itemname\"].apply(lambda x:x.split(\"_\")[0])\n",
 					"df[\"INV\"]=df[\"itemname\"].apply(lambda x:x.split(\"_\")[1].split('_')[0])"
 				],
-				"execution_count": 169
+				"execution_count": 202
 			},
 			{
 				"cell_type": "code",
@@ -313,7 +389,7 @@
 				"source": [
 					"df[\"Block\"]=\"Phelan50MW\""
 				],
-				"execution_count": 170
+				"execution_count": 203
 			},
 			{
 				"cell_type": "code",
@@ -331,7 +407,7 @@
 				"source": [
 					"df[\"ICR\"].unique()"
 				],
-				"execution_count": 171
+				"execution_count": 204
 			},
 			{
 				"cell_type": "code",
@@ -359,7 +435,7 @@
 					"\n",
 					"dfc=df.groupby(by=[\"Inv\",\"Hour\"]).agg(\"max\").reset_index()"
 				],
-				"execution_count": 172
+				"execution_count": 205
 			},
 			{
 				"cell_type": "code",
@@ -377,7 +453,7 @@
 				"source": [
 					"dfc"
 				],
-				"execution_count": 173
+				"execution_count": 206
 			},
 			{
 				"cell_type": "code",
@@ -397,7 +473,7 @@
 					"dfc_final=dfc_final[[\"Date\",\"Hour\",\"Minute\",\"itemname\",\"Inv\",\"value\"]]\n",
 					"dfc_final[\"value\"]=dfc_final[\"value\"].astype(\"float32\")"
 				],
-				"execution_count": 174
+				"execution_count": 207
 			},
 			{
 				"cell_type": "code",
@@ -415,7 +491,7 @@
 				"source": [
 					"dfc1=dfc_final.groupby(by=[\"Inv\"]).agg(\"max\").reset_index()"
 				],
-				"execution_count": 175
+				"execution_count": 208
 			},
 			{
 				"cell_type": "code",
@@ -433,7 +509,7 @@
 				"source": [
 					"dfc1"
 				],
-				"execution_count": 176
+				"execution_count": 209
 			},
 			{
 				"cell_type": "code",
@@ -455,7 +531,7 @@
 					"Radiation_Block1[\"Hour\"]=pd.DatetimeIndex(Radiation_Block1[\"ISTtime\"]).hour\n",
 					"Radiation_Block1[\"Minute\"]=pd.DatetimeIndex(Radiation_Block1[\"ISTtime\"]).minute"
 				],
-				"execution_count": 177
+				"execution_count": 210
 			},
 			{
 				"cell_type": "code",
@@ -463,7 +539,7 @@
 					"import seaborn as sns\n",
 					"sns.lineplot(data=Radiation_Block1,x=\"ISTtime\",y=\"value\")"
 				],
-				"execution_count": 178
+				"execution_count": 211
 			},
 			{
 				"cell_type": "code",
@@ -487,21 +563,21 @@
 					"df2 = df2[~df2[\"itemname\"].str.contains('MOD', na=True)]\n",
 					"df2.sort_values(by=[\"Hour\",\"Minute\"],axis=0,inplace=True,ascending=True)"
 				],
-				"execution_count": 179
+				"execution_count": 212
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"df2.sort_values(by=[\"Hour\",\"Minute\"],axis=0,inplace=True,ascending=True)"
 				],
-				"execution_count": 180
+				"execution_count": 213
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"df2"
 				],
-				"execution_count": 181
+				"execution_count": 214
 			},
 			{
 				"cell_type": "code",
@@ -520,14 +596,14 @@
 					"\n",
 					"df2[\"Hour\"].value_counts()"
 				],
-				"execution_count": 182
+				"execution_count": 215
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"df2.info()"
 				],
-				"execution_count": 183
+				"execution_count": 216
 			},
 			{
 				"cell_type": "code",
@@ -552,7 +628,7 @@
 					"df1 = df1[~df1[\"itemname\"].str.contains('MOD', na=True)]\n",
 					"df1.sort_values(by=[\"Hour\",\"Minute\"],axis=0,inplace=True,ascending=True)"
 				],
-				"execution_count": 184
+				"execution_count": 217
 			},
 			{
 				"cell_type": "code",
@@ -570,7 +646,7 @@
 				"source": [
 					"df1[\"itemname_1\"]=df1[\"itemname\"].str.split(\"_\").str[0]+\"_\"+df1[\"itemname\"].str.split(\"_\").str[1]"
 				],
-				"execution_count": 185
+				"execution_count": 218
 			},
 			{
 				"cell_type": "code",
@@ -589,7 +665,7 @@
 					"\n",
 					"df2[\"itemname_1\"]=df2[\"itemname\"].str.split(\"_\").str[0]+\"_\"+df2[\"itemname\"].str.split(\"_\").str[1]"
 				],
-				"execution_count": 186
+				"execution_count": 219
 			},
 			{
 				"cell_type": "code",
@@ -607,7 +683,7 @@
 				"source": [
 					"df2"
 				],
-				"execution_count": 187
+				"execution_count": 220
 			},
 			{
 				"cell_type": "code",
@@ -625,7 +701,7 @@
 				"source": [
 					"df1"
 				],
-				"execution_count": 188
+				"execution_count": 221
 			},
 			{
 				"cell_type": "code",
@@ -645,7 +721,7 @@
 					"df1=df1[[\"ISTtime_x\",\"itemname_1\",\"value_x\",\"value_y\",\"Date_y\",\"Hour\",\"Minute\",\"Time_x\"]]\n",
 					"df1[\"itemname\"]=df1[\"itemname_1\"]+\"_\"+\"EFFICIENCY\""
 				],
-				"execution_count": 189
+				"execution_count": 222
 			},
 			{
 				"cell_type": "code",
@@ -663,7 +739,7 @@
 				"source": [
 					"df1"
 				],
-				"execution_count": 190
+				"execution_count": 223
 			},
 			{
 				"cell_type": "code",
@@ -684,7 +760,7 @@
 					"df1[\"value\"]=df1[\"value_x\"]/df1[\"value_y\"]\n",
 					"df1=df1[[\"ISTtime_x\",\"itemname\",\"value\",\"Date_y\",\"Time_x\",\"Hour\",\"Minute\"]]"
 				],
-				"execution_count": 191
+				"execution_count": 224
 			},
 			{
 				"cell_type": "code",
@@ -704,7 +780,7 @@
 					"\"Date_y\":\"Date\",\n",
 					"\"Time_x\":\"Time\",},inplace=True)"
 				],
-				"execution_count": 192
+				"execution_count": 225
 			},
 			{
 				"cell_type": "code",
@@ -722,7 +798,7 @@
 				"source": [
 					"df1"
 				],
-				"execution_count": 193
+				"execution_count": 226
 			},
 			{
 				"cell_type": "code",
@@ -740,7 +816,7 @@
 				"source": [
 					"df2"
 				],
-				"execution_count": 194
+				"execution_count": 227
 			},
 			{
 				"cell_type": "code",
@@ -759,7 +835,7 @@
 					"df2=df2.iloc[:,0:7]\n",
 					"df2"
 				],
-				"execution_count": 195
+				"execution_count": 228
 			},
 			{
 				"cell_type": "code",
@@ -793,7 +869,7 @@
 					"\"ITC4_INV3_KW\",\n",
 					"\"ITC4_INV4_KW\"]"
 				],
-				"execution_count": 196
+				"execution_count": 229
 			},
 			{
 				"cell_type": "code",
@@ -811,7 +887,7 @@
 				"source": [
 					"print(len(Block1_list))"
 				],
-				"execution_count": 197
+				"execution_count": 230
 			},
 			{
 				"cell_type": "code",
@@ -829,7 +905,7 @@
 				"source": [
 					"import datetime"
 				],
-				"execution_count": 198
+				"execution_count": 231
 			},
 			{
 				"cell_type": "code",
@@ -848,7 +924,7 @@
 					"data_frame_list_final=[]\n",
 					"data_frame_inverter_downtime_list_final=[]"
 				],
-				"execution_count": 199
+				"execution_count": 232
 			},
 			{
 				"cell_type": "code",
@@ -866,7 +942,7 @@
 				"source": [
 					"df2"
 				],
-				"execution_count": 200
+				"execution_count": 233
 			},
 			{
 				"cell_type": "code",
@@ -885,7 +961,7 @@
 					"df1=df1[df1[\"value\"]!='inf']\n",
 					"df1"
 				],
-				"execution_count": 201
+				"execution_count": 234
 			},
 			{
 				"cell_type": "code",
@@ -909,7 +985,7 @@
 					"# Printing df\n",
 					"df1"
 				],
-				"execution_count": 202
+				"execution_count": 235
 			},
 			{
 				"cell_type": "code",
@@ -927,7 +1003,7 @@
 				"source": [
 					"df1.dropna(subset=[\"value\"],inplace=True)"
 				],
-				"execution_count": 203
+				"execution_count": 236
 			},
 			{
 				"cell_type": "code",
@@ -943,9 +1019,9 @@
 					}
 				},
 				"source": [
-					"df2[(df2[\"itemname\"]==\"ITC1_INV4_KW\")  & (df2[\"ISTtime\"]>=\"2022-04-21 12:52:00.000\")]"
+					"#df2[(df2[\"itemname\"]==\"ITC1_INV4_KW\")  & (df2[\"ISTtime\"]>=\"2022-04-21 12:52:00.000\")]"
 				],
-				"execution_count": 204
+				"execution_count": 237
 			},
 			{
 				"cell_type": "code",
@@ -963,20 +1039,14 @@
 				"source": [
 					"Radiation_Block1"
 				],
-				"execution_count": 205
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					""
-				]
+				"execution_count": 238
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"df"
 				],
-				"execution_count": 206
+				"execution_count": 239
 			},
 			{
 				"cell_type": "code",
@@ -994,6 +1064,10 @@
 					"    sleep_time=str(df_each_tag[df_each_tag[\"value\"]!=0][\"ISTtime\"].tail(1)).split(\" \")[4].split(\"\\n\")[0]\n",
 					"    sleep_time_hour=sleep_time.split(\":\")[0]\n",
 					"    sleep_time_minute=sleep_time.split(\":\")[1]\n",
+					"    Dc_load_Tag=i.split(\"_\")[0]+\"_\"+i.split(\"_\")[1]+\"_\"+\"TODAY_KWH\"\n",
+					"    print(\"Dc_load Tag\",Dc_load_Tag)\n",
+					"    Dc_load=float(df_Static[df_Static[\"InvEnergy_kWh\"]==Dc_load_Tag][\"InvDCLoad\"].iloc[0])\n",
+					"    print(Dc_load)\n",
 					"    Radiation_up_time=str(Radiation_Block1[Radiation_Block1[\"value\"]!=0][\"ISTtime\"].head(1)).split(\" \")[4].split(\"\\n\")[0]\n",
 					"    Radiation_hour=Radiation_up_time.split(\":\")[0]\n",
 					"    Radiation_minute=Radiation_up_time.split(\":\")[1]\n",
@@ -1103,14 +1177,14 @@
 					"    each_tag_list.append(op_minute-np.round(downtime,2))\n",
 					"    each_tag_list.append(np.round(df_each_tag_inv_efficiency_average,4))\n",
 					"    each_tag_list.append(np.round(df_each_tag_inv_efficiency_max,4))\n",
-					"    each_tag_list.append(np.round((energy_loss)*df_each_tag_inv_efficiency_max,2))\n",
+					"    each_tag_list.append(np.round((energy_loss/15000)*(df_each_tag_inv_efficiency_max*Pr*Dc_load),2))\n",
 					"    data_frame_list.append(each_tag_list)\n",
 					"    \n",
 					"data_frame_list_final.extend(data_frame_list)\n",
 					"data_frame_inverter_downtime_list_final.extend(data_frame_inverter_downtime_list)\n",
 					"print(len(data_frame_list_final))"
 				],
-				"execution_count": 207
+				"execution_count": 240
 			},
 			{
 				"cell_type": "code",
@@ -1128,7 +1202,7 @@
 				"source": [
 					"data_frame_list_final"
 				],
-				"execution_count": 208
+				"execution_count": 241
 			},
 			{
 				"cell_type": "code",
@@ -1149,7 +1223,7 @@
 					"#df_main1['Date'] = df_main1['Date'].astype('datetime64[ns]')\n",
 					"#df_main1.to_excel(\"InverterT2ExtensioB2.xlsx\")"
 				],
-				"execution_count": 209
+				"execution_count": 242
 			},
 			{
 				"cell_type": "code",
@@ -1167,7 +1241,7 @@
 				"source": [
 					"df_main1"
 				],
-				"execution_count": 210
+				"execution_count": 243
 			},
 			{
 				"cell_type": "code",
@@ -1186,7 +1260,7 @@
 					"columns1=[\"Date\",\"Inv\",\"Down_From\",\"Down_To\",\"Minutes\"]\n",
 					"df_main2=pd.DataFrame(data_frame_inverter_downtime_list_final,columns=columns1)"
 				],
-				"execution_count": 211
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
@@ -1205,7 +1279,7 @@
 					"df_main2=df_main2[df_main2[\"Minutes\"]!=0]\n",
 					"df_main2"
 				],
-				"execution_count": 212
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -1226,7 +1300,7 @@
 					"    spark.sql(\"create database if not exists phelan\")\n",
 					"    df_spark3.write.format(\"delta\").mode(\"append\").saveAsTable(\"phelan.invdowntime\")"
 				],
-				"execution_count": 213
+				"execution_count": 351
 			},
 			{
 				"cell_type": "code",
@@ -1254,7 +1328,25 @@
 					"\n",
 					"#df_main1[\"Inv\"]=df_main1[\"ICR\"].str[0]+df_main1[\"ICR\"].str[-1:]+\"_\"+df_main1[\"INV\"].str[-1]"
 				],
-				"execution_count": 214
+				"execution_count": 44
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df_main1"
+				],
+				"execution_count": 353
 			},
 			{
 				"cell_type": "code",
@@ -1272,7 +1364,7 @@
 				"source": [
 					"dfc1"
 				],
-				"execution_count": 215
+				"execution_count": 354
 			},
 			{
 				"cell_type": "code",
@@ -1290,7 +1382,7 @@
 				"source": [
 					"Table2_Final=pd.merge(dfc1,df_main1,on=\"Inv\",how=\"inner\")"
 				],
-				"execution_count": 216
+				"execution_count": 45
 			},
 			{
 				"cell_type": "code",
@@ -1308,7 +1400,7 @@
 				"source": [
 					"Table2_Final = Table2_Final.rename(columns={'value': 'Inverter_Energy'})"
 				],
-				"execution_count": 217
+				"execution_count": 46
 			},
 			{
 				"cell_type": "code",
@@ -1336,7 +1428,7 @@
 					"                                           'Max_Efficiency':'InvMaxEff',\n",
 					"                                           'EnergyLoss':'InvEnergyLoss'})"
 				],
-				"execution_count": 218
+				"execution_count": 47
 			},
 			{
 				"cell_type": "code",
@@ -1353,28 +1445,9 @@
 				},
 				"source": [
 					"Table2_Final[\"InvEnergy\"]=Table2_Final[\"InvEnergy\"].astype(\"float32\")\r\n",
-					"Table2_Final[\"InvDowntime\"]=Table2_Final[\"InvEnergy\"].astype(\"float32\")"
+					"Table2_Final[\"InvDowntime\"]=Table2_Final[\"InvDowntime\"].astype(\"float32\")"
 				],
-				"execution_count": 231
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"outputs_hidden": false,
-						"source_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					"location_output = \"abfss://repono@ayanadatalake.dfs.core.windows.net/Phelan/\"\n",
-					"Table2_Final.to_excel(location_output+\"inverter_phelan.xlsx\",index=False)"
-				],
-				"execution_count": 236
+				"execution_count": 358
 			},
 			{
 				"cell_type": "code",
@@ -1406,7 +1479,7 @@
 					"                    StructField(\"InvEnergyLoss\",DoubleType()),\n",
 					"])"
 				],
-				"execution_count": 237
+				"execution_count": 360
 			},
 			{
 				"cell_type": "code",
@@ -1424,7 +1497,7 @@
 				"source": [
 					"Table2_Final.info()"
 				],
-				"execution_count": 238
+				"execution_count": 361
 			},
 			{
 				"cell_type": "code",
@@ -1444,7 +1517,7 @@
 					"spark.sql(\"create database if not exists phelan\")\n",
 					"df_spark2.write.format(\"delta\").mode(\"append\").saveAsTable(\"phelan.invperformance\")"
 				],
-				"execution_count": 239
+				"execution_count": 362
 			},
 			{
 				"cell_type": "markdown",
@@ -1476,7 +1549,7 @@
 					"df_invperf=spark.sql(\"select * from phelan.invperformance order by Date\")\n",
 					"df_invperfNOTI=df_invperf.toPandas()"
 				],
-				"execution_count": 240
+				"execution_count": 48
 			},
 			{
 				"cell_type": "code",
@@ -1492,9 +1565,9 @@
 					}
 				},
 				"source": [
-					"df_invperfNOTI"
+					"df_invperfNOTI.to_excel(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_Insights/Bhdl_Insights_Table2Inv/Bhdl_Insights_InvperformanceCons.xlsx\")"
 				],
-				"execution_count": 244
+				"execution_count": 49
 			},
 			{
 				"cell_type": "code",
@@ -1510,10 +1583,10 @@
 					}
 				},
 				"source": [
-					"df_Static=pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Phelan/Phelan_StaticFolder/Inverter_Table2_Phelan.csv\")\n",
+					"df_Static=pd.read_csv(\"abfss://repono@ayanadatalake.dfs.core.windows.net/Bhdl/Bhdl_StaticData/Bhdl_StaticData_Inverter/Bhdl_Inverter_DowntimeLossCalc.csv\")\n",
 					"df_Static.head(5)"
 				],
-				"execution_count": 242
+				"execution_count": 50
 			},
 			{
 				"cell_type": "code",
@@ -1532,7 +1605,8 @@
 					"def dataframe_to_dict(df_Static, key_column, value_column):\n",
 					"    invDict = df_Static.set_index(key_column)[value_column].to_dict()\n",
 					"    return invDict"
-				]
+				],
+				"execution_count": 51
 			},
 			{
 				"cell_type": "code",
@@ -1549,7 +1623,8 @@
 				},
 				"source": [
 					"dc_load_mapping_dict=dataframe_to_dict(df_Static,\"Inv\",\"InvDCLoad\")"
-				]
+				],
+				"execution_count": 52
 			},
 			{
 				"cell_type": "code",
@@ -1567,7 +1642,8 @@
 				"source": [
 					"df_invperfNOTI[\"InvDCLoad\"]=df_invperfNOTI[\"Inv\"].map(dc_load_mapping_dict)\n",
 					"#df_invperfNOTI.head()"
-				]
+				],
+				"execution_count": 53
 			},
 			{
 				"cell_type": "code",
@@ -1588,7 +1664,8 @@
 					"\n",
 					"df_invperfNOTI[\"Date\"]=df_invperfNOTI[\"Date\"].astype(\"datetime64[ns]\")\n",
 					"df_invperfNOTI[\"Date\"]=df_invperfNOTI[\"Date\"].map(lambda x:str(x).split(\" \")[0])"
-				]
+				],
+				"execution_count": 54
 			},
 			{
 				"cell_type": "code",
@@ -1605,7 +1682,8 @@
 				},
 				"source": [
 					"df_notifinal=df_invperfNOTI.copy()"
-				]
+				],
+				"execution_count": 55
 			},
 			{
 				"cell_type": "code",
@@ -1629,7 +1707,8 @@
 					"dftd1=df_notifinal[(df_notifinal[\"Date\"]==str(td1))]\n",
 					"dfyes1=df_notifinal[(df_notifinal[\"Date\"]==str(yesterday))]\n",
 					"#dftd1"
-				]
+				],
+				"execution_count": 56
 			},
 			{
 				"cell_type": "code",
@@ -1647,7 +1726,8 @@
 				"source": [
 					"today_list=list(dftd1.sort_values(by=\"SpyPUT\",ascending=True).head(10)[\"Inv\"])\n",
 					"today_list"
-				]
+				],
+				"execution_count": 57
 			},
 			{
 				"cell_type": "code",
@@ -1670,7 +1750,68 @@
 					"if (yes1_list_set & today_list_set):\n",
 					"    two_days_set=yes1_list_set & today_list_set\n",
 					"two_days_set"
-				]
+				],
+				"execution_count": 58
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"PhLowPerfINVs = list(two_days_set)\r\n",
+					"print(PhLowPerfINVs)"
+				],
+				"execution_count": 62
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Phlow_inv=''\r\n",
+					"for i in PhLowPerfINVs:\r\n",
+					"        Phlow_inv+=i+', '\r\n",
+					"Phlow_inv\r\n",
+					"x=\"**Phelan50MW:**\"+\"\\r\\n\\r\"+\"Low Performing Inverters: \"+\"\\r\\n\\r\"+(Phlow_inv[:-2])\r\n",
+					"x"
+				],
+				"execution_count": 101
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Phlow_inv"
+				],
+				"execution_count": 79
 			},
 			{
 				"cell_type": "code",
@@ -1687,10 +1828,11 @@
 				},
 				"source": [
 					"import pymsteams\n",
-					"myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/ac6eaf82-b2d0-4b46-8e52-a17f3fc5051d@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/ab1320c704ed43e88d7a1fe9b7618ee9/0a64ab19-2984-4746-9447-21882231bb32\")\n",
-					"myTeamsMessage.text(str(two_days_set))\n",
+					"myTeamsMessage = pymsteams.connectorcard(\"https://ayanapower.webhook.office.com/webhookb2/17435f69-7867-4a41-b5f0-46ceb0fb534f@59b60474-e282-44b5-881c-bb9ce815690c/IncomingWebhook/2479443b8a834ca4abc376fe32a7c4d6/0a64ab19-2984-4746-9447-21882231bb32\")\n",
+					"myTeamsMessage.text(x)\n",
 					"myTeamsMessage.send()"
-				]
+				],
+				"execution_count": 102
 			},
 			{
 				"cell_type": "markdown",

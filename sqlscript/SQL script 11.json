@@ -2,12 +2,12 @@
 	"name": "SQL script 11",
 	"properties": {
 		"content": {
-			"query": "",
+			"query": "select * from dbo.invperformance\nwhere InvDowntime=0 and InvEnergyLoss!=0\norder by date DESC",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "bkn2",
+				"databaseName": "reassets",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
